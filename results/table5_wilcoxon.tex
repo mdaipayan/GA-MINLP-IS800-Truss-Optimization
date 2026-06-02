@@ -1,0 +1,19 @@
+% Table 5: Wilcoxon signed-rank tests after seed-control correction
+\begin{table}[tbp]\centering
+\caption{Wilcoxon signed-rank test results ($N=20$): GA--MINLP$^\star$ versus competing stochastic methods after the seed-control correction. $H_1$: GA--MINLP$^\star$ weight $<$ competitor. $W$\,=\,Wilcoxon statistic; `ns'\,=\,not significant at $\alpha=0.05$.}
+\label{tab:wilcoxon}
+\begin{tabular}{@{}llrrl@{}}\toprule
+\textbf{Truss} & \textbf{Competitor} & $W$ & $p$-value & \textbf{Conclusion} \\
+\midrule
+\multirow{5}{*}{25-Bar} & SA & 3 & $<$0.001 & $p<0.001$ \\
+ & GA & 0 & $<$0.001 & $p<0.001$ \\
+ & PSO & 0 & $<$0.001 & $p<0.001$ \\
+ & BB-BC & 0 & $<$0.001 & $p<0.001$ \\
+ & DE & 3 & $<$0.001 & $p<0.001$ \\
+\midrule
+\multirow{5}{*}{72-Bar} & SA & 0 & $<$0.001 & $p<0.001$ \\
+ & GA & 0 & $<$0.001 & $p<0.001$ \\
+ & PSO & 210 & 1.0000 & ns \\
+ & BB-BC & 0 & $<$0.001 & $p<0.001$ \\
+ & DE & 18 & $<$0.001 & $p<0.001$ \\
+\bottomrule\end{tabular}\end{table}

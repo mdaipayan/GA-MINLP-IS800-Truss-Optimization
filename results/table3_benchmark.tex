@@ -1,0 +1,30 @@
+% Table 3: Benchmark comparison after seed-control correction
+\begin{table}[tbp]\centering
+\caption{Best IS~800:2007-compliant weights~(kg) after the seed-control correction, compared with published AISC-based reference values. $^\dagger$AISC sections; $^\ddagger$This work, IS~800:2007/SP~6(1):1964. n/a: no IS~800-compliant solution obtained in the present run.}
+\label{tab:benchmark}
+\begin{tabular}{@{}lcc@{}}\toprule
+\textbf{Method / Reference} & \textbf{25-Bar (kg)} & \textbf{72-Bar (kg)}\\
+\midrule
+\textit{Published (AISC$^\dagger$)} & & \\
+\quad Camp \& Bichon (2004) ACO & 216.9 & --- \\
+\quad Perez \& Behdinan (2007) PSO & 213.7 & 162.9 \\
+\quad Camp (2007) BB-BC & --- & 167.3 \\
+\midrule
+\textit{This work (IS~800/SP~6(1)$^\ddagger$)} & & \\
+\quad FSD & n/a & 236.62\\
+\quad LP & n/a & 93.95\\
+\quad SLP & n/a & 93.95\\
+\quad SQP & 517.23 & 448.75\\
+\quad NLP & 584.56 & 758.62\\
+\quad MILP & n/a & 93.95\\
+\quad MINLP & 403.57 & 308.24\\
+\quad SA & 294.02 & 405.84\\
+\quad GA & 363.65 & 369.58\\
+\quad PSO & 397.17 & 96.55\\
+\quad ACO & n/a & 93.95\\
+\quad BB-BC & 667.80 & 756.41\\
+\quad DE & 312.91 & 271.70\\
+\quad GA-MINLP$^\ddagger$ & 248.10 & 241.67\\
+\bottomrule
+\end{tabular}
+\end{table}

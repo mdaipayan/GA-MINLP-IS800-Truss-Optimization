@@ -1,0 +1,34 @@
+% Table 2: Statistical results after seed-control correction (N=20)
+\begin{table*}[tbp]\centering
+\caption{Seed-controlled statistical optimization results over $N=20$ independent runs per stochastic method per truss. SR\,=\,success rate (\% of runs yielding IS~800:2007-compliant designs). Mean$_F$ and Best$_F$ are computed over feasible runs only. Bold = lowest best feasible weight among stochastic methods for that truss.}
+\label{tab:statistical}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+\textbf{Truss} & \textbf{Method} & \textbf{Mean}$_F$ (kg) & \textbf{Std}$_F$ (kg) & \textbf{Best}$_F$ (kg) & \textbf{SR} (\%) & $\bar{t}$ (s) \\
+\midrule
+\multirow{7}{*}{6-Bar} & SA & \textbf{127.26} & 27.20 & \textbf{101.17} & 100 & 0.13 \\
+ & GA & \textbf{104.05} & 2.29 & \textbf{101.17} & 100 & 0.15 \\
+ & PSO & \textbf{101.84} & 1.42 & \textbf{101.17} & 100 & 0.02 \\
+ & ACO & --- & 0.00 & --- & 0 & 0.06 \\
+ & BB-BC & 198.09 & 19.33 & 159.54 & 100 & 0.13 \\
+ & DE & \textbf{101.17} & 0.00 & \textbf{101.17} & 100 & 0.17 \\
+ & GA-MINLP$^\star$ & \textbf{101.17} & 0.00 & \textbf{101.17} & 100 & 0.45 \\
+\midrule
+\multirow{7}{*}{25-Bar} & SA & 392.72 & 50.20 & 294.02 & 100 & 0.02 \\
+ & GA & 457.52 & 34.99 & 363.65 & 100 & 0.02 \\
+ & PSO & 643.15 & 186.57 & 397.17 & 100 & 0.01 \\
+ & ACO & --- & 0.00 & --- & 0 & 0.07 \\
+ & BB-BC & 767.15 & 64.52 & 667.80 & 100 & 0.02 \\
+ & DE & 351.66 & 24.49 & 312.91 & 100 & 1.15 \\
+ & GA-MINLP$^\star$ & \textbf{297.80} & 25.28 & \textbf{248.10} & 100 & 2.95 \\
+\midrule
+\multirow{7}{*}{72-Bar} & SA & 503.01 & 49.19 & 405.84 & 100 & 0.07 \\
+ & GA & 445.62 & 31.13 & 369.58 & 100 & 0.03 \\
+ & PSO & 123.80 & 24.42 & 96.55 & 100 & 0.02 \\
+ & ACO & \textbf{94.98} & 1.02 & \textbf{93.95} & 100 & 0.17 \\
+ & BB-BC & 828.89 & 38.32 & 756.41 & 100 & 0.03 \\
+ & DE & 304.78 & 12.09 & 271.70 & 100 & 4.19 \\
+ & GA-MINLP$^\star$ & 283.58 & 19.02 & 241.67 & 100 & 11.27 \\
+\bottomrule
+\end{tabular}
+\end{table*}

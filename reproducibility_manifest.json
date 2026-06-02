@@ -1,0 +1,130 @@
+[
+  {
+    "path": ".gitignore",
+    "size": 102
+  },
+  {
+    "path": "CITATION.cff",
+    "size": 544
+  },
+  {
+    "path": "LICENSE",
+    "size": 1072
+  },
+  {
+    "path": "README.md",
+    "size": 2128
+  },
+  {
+    "path": "data/README.md",
+    "size": 280
+  },
+  {
+    "path": "docs/EWC_step4_author_actions.md",
+    "size": 895
+  },
+  {
+    "path": "docs/EWC_step4_changes.md",
+    "size": 1044
+  },
+  {
+    "path": "docs/EWC_step6_compile_check_report.txt",
+    "size": 1361
+  },
+  {
+    "path": "figures/fig1_geometry.pdf",
+    "size": 36789
+  },
+  {
+    "path": "figures/fig2_convergence_6bar.pdf",
+    "size": 31711
+  },
+  {
+    "path": "figures/fig3_convergence_25bar.pdf",
+    "size": 32442
+  },
+  {
+    "path": "figures/fig4_convergence_72bar.pdf",
+    "size": 32849
+  },
+  {
+    "path": "figures/fig5_weight_comparison.pdf",
+    "size": 54889
+  },
+  {
+    "path": "figures/fig6_phase_improvement.pdf",
+    "size": 28832
+  },
+  {
+    "path": "manuscript/EWC_Title_Page.pdf",
+    "size": 99550
+  },
+  {
+    "path": "manuscript/EWC_Title_Page.tex",
+    "size": 3274
+  },
+  {
+    "path": "manuscript/Highlights_EWC.txt",
+    "size": 208
+  },
+  {
+    "path": "manuscript/paper1_manuscript_EWC_springer_with_titlepage.pdf",
+    "size": 648412
+  },
+  {
+    "path": "manuscript/paper1_manuscript_EWC_springer_with_titlepage.tex",
+    "size": 66681
+  },
+  {
+    "path": "notebooks/Paper1_Numba_Colab.ipynb",
+    "size": 17878
+  },
+  {
+    "path": "requirements.txt",
+    "size": 64
+  },
+  {
+    "path": "results/stats_results_seedfixed.json",
+    "size": 600963
+  },
+  {
+    "path": "results/table2_statistical.tex",
+    "size": 1937
+  },
+  {
+    "path": "results/table3_benchmark.tex",
+    "size": 1211
+  },
+  {
+    "path": "results/table4_is800_6bar.tex",
+    "size": 884
+  },
+  {
+    "path": "results/table5_wilcoxon.tex",
+    "size": 958
+  },
+  {
+    "path": "src/generate_tables.py",
+    "size": 7994
+  },
+  {
+    "path": "src/paper_suite.py",
+    "size": 34559
+  },
+  {
+    "path": "src/run_fresh.py",
+    "size": 19284
+  },
+  {
+    "path": "src/run_locally.py",
+    "size": 813
+  },
+  {
+    "path": "src/truss_engine.py",
+    "size": 57365
+  },
+  {
+    "path": "src/verify_environment.py",
+    "size": 700
+  }
+]

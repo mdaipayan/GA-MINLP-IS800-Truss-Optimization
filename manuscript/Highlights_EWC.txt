@@ -1,0 +1,5 @@
+Article Highlights
+
+• GA warm-starting improves catalogue-based truss optimization.
+• IS 800 buckling checks are evaluated during the search.
+• Integer section indices avoid post-optimization rounding.

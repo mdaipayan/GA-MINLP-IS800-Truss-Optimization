@@ -1,0 +1,27 @@
+Engineering with Computers Step 6 Compile Check
+
+Manuscript: paper1_manuscript_EWC_final.tex
+Compiled PDF: paper1_manuscript_EWC_final.pdf
+Compile engine: pdflatex
+Passes: 3
+Result: Successful compile
+Pages: 31
+Undefined references/citations: none detected in final pdflatex pass
+Major layout issue fixed: computational parameter table was converted from a floating table to a longtable to prevent clipping.
+Visual check: PDF rendered to page images and contact sheet; no obvious clipped tables/figures in checked output.
+
+Files included:
+- Manuscript PDF
+- Manuscript LaTeX source
+- Six uploaded figure PDFs
+- Updated LaTeX tables from Step 5
+- Three Engineering with Computers article highlights
+- Cover letter draft
+- Seed-fixed stats_results JSON
+- Reproducibility repository ZIP
+
+Important final author checks before online submission:
+1. Replace anonymised author details with actual author names, affiliations, ORCID, and email if the journal uses single-blind review.
+2. Confirm whether Engineering with Computers requires the Springer Nature LaTeX class at initial submission. This file currently compiles as a working elsarticle-style review manuscript.
+3. Verify the benchmark named 72-bar in the code/report, because the run log reported 56 active members for that model.
+4. Replace placeholder repository/DOI links after GitHub or Zenodo archival.

@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: "GA-MINLP-IS800-Truss-Optimization"
+message: "If you use this software, please cite the associated Engineering with Computers manuscript and archived release DOI."
+type: software
+authors:
+  - family-names: "Mandal"
+    given-names: "Daipayan"
+repository-code: "https://github.com/mdaipayan/GA-MINLP-IS800-Truss-Optimization"
+abstract: "Reproducibility package for GA-warm-started mixed-integer nonlinear optimization of IS 800-compliant space trusses."
+license: MIT
+version: 1.0.0-submission
+date-released: 2026-06-02

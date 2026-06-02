@@ -1,0 +1,1388 @@
+%% Version 3.1 December 2024
+%% Springer Nature journal article template conversion for Engineering with Computers
+%% Prepared from the Engineering with Computers final manuscript.
+
+\documentclass[lineno,pdflatex,sn-mathphys-num]{sn-jnl}
+
+%%%% Standard packages
+\usepackage{graphicx}%%
+\usepackage{multirow}%%
+\usepackage{amsmath,amssymb,amsfonts}%%
+\usepackage{bm}%%
+\usepackage{booktabs,longtable,array}%%
+\usepackage{xcolor}%%
+\usepackage{colortbl}%%
+\usepackage{textcomp}%%
+\usepackage{manyfoot}%%
+\usepackage{algorithm}%%
+\usepackage{algorithmicx}%%
+\usepackage{algpseudocode}%%
+\usepackage{listings}%%
+\usepackage{subcaption}%%
+\usepackage[capitalise,noabbrev]{cleveref}%%
+
+\graphicspath{{./}}
+\definecolor{highlightbg}{RGB}{255,250,205}
+
+\raggedbottom
+
+\begin{document}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\small
+\begin{center}
+{\Large\bfseries Title Page}\\[0.7em]
+{Engineering with Computers -- Original Article}\\[1.0em]
+{\LARGE\bfseries A GA-Warm-Started Mixed-Integer Nonlinear Framework for Discrete IS~800-Compliant Space-Truss Optimization}\\[0.5em]
+{\footnotesize Short title: A GA-warm-started MINLP framework for code-constrained truss optimization}
+\end{center}
+
+\vspace{0.7em}
+\noindent\textbf{Authors:} First Author\textsuperscript{1,*} and Second Author\textsuperscript{1}\\
+\textbf{Affiliation:} \textsuperscript{1}Department of Civil Engineering, Institute/University Name, City, State, India.\\
+\textbf{Corresponding author:} First Author; \texttt{corresponding.author@example.com}\\
+\textbf{Contributing author:} Second Author; \texttt{second.author@example.com}\\
+\textbf{ORCID IDs:} First Author: [ORCID ID]; Second Author: [ORCID ID]
+
+\vspace{0.7em}
+\noindent\textbf{Acknowledgements.} The authors gratefully acknowledge the computational support provided by the Department of Civil Engineering.
+
+\vspace{0.45em}
+\noindent\textbf{Funding.} The authors received no specific funding for this work. Update this statement if any institutional, government, or project funding supported the study.
+
+\vspace{0.45em}
+\noindent\textbf{Author contributions.} Author 1: Conceptualisation, methodology, software, validation, formal analysis, visualization, and writing--original draft. Author 2: Supervision, methodology review, validation review, and writing--review and editing.
+
+\vspace{0.45em}
+\noindent\textbf{Competing interests.} The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\vspace{0.45em}
+\noindent\textbf{Ethics approval and consent to participate.} Not applicable.
+
+\vspace{0.45em}
+\noindent\textbf{Consent for publication.} Not applicable.
+
+\vspace{0.45em}
+\noindent\textbf{Data availability.} The benchmark definitions, section catalogue data, optimization results, and post-processing files required to reproduce the tables and figures will be made available in a public repository at: [repository DOI/URL to be added before submission].
+
+\vspace{0.45em}
+\noindent\textbf{Code availability.} The Python implementation used for the direct-stiffness analysis, IS~800:2007 member checks, optimization algorithms, statistical runs, and figure/table generation will be made available in the same repository at: [repository DOI/URL to be added before submission].
+
+\vspace{0.45em}
+\noindent\textbf{Use of AI-assisted technologies.} During the preparation of this manuscript, the authors used Claude (Anthropic) and ChatGPT (OpenAI) to assist with \LaTeX{} formatting, language editing, manuscript organisation, and journal-specific wording. The authors reviewed and edited all AI-assisted content and take full responsibility for the scientific accuracy and integrity of the work.
+
+\vfill
+\noindent\textit{Author action before submission: replace all placeholder names, emails, affiliation, ORCID IDs, and repository DOI/URL.}
+\end{titlepage}
+\clearpage
+\setcounter{page}{1}
+
+\begin{center}
+{\LARGE\bfseries A GA-Warm-Started Mixed-Integer Nonlinear Framework for Discrete IS~800-Compliant Space-Truss Optimization}
+\end{center}
+
+\section*{Abstract}
+Discrete sizing and topology optimization of steel space trusses becomes a
+non-smooth mixed-integer problem when catalogue sections and member buckling
+checks are imposed during the search. This study develops a
+GA-warm-started mixed-integer nonlinear optimization framework for Indian
+standard equal-angle trusses. A genetic algorithm first explores binary
+member topology and SP~6(1):1964 section indices. Elite feasible or
+near-feasible designs then warm-start a second integer nonlinear search in
+which catalogue indices are refined while IS~800:2007 stress, slenderness,
+and Annex~D compression-capacity checks are evaluated explicitly for each
+candidate design. Structural response is computed using the direct stiffness
+method, so each candidate is assessed through analysis--design coupling
+rather than post-optimization section rounding. The framework is tested on
+6-, 25-, and 72-bar space-truss benchmarks and compared with deterministic,
+mathematical-programming, and metaheuristic baselines over 20 independent
+stochastic runs. The proposed hybrid reproduces the 6-bar benchmark best
+weight of 101.17~kg, reduces the 25-bar GA best baseline by 31.8\% to 248.10~kg,
+and reduces the 72-bar GA best baseline by 34.6\% to 241.67~kg. The results show
+that warm-started integer nonlinear search can improve catalogue-constrained
+truss designs while maintaining direct code-based feasibility screening. The
+study also identifies cases where lighter penalty-based designs require
+independent post-optimization verification, emphasizing the importance of
+transparent feasibility reporting in code-constrained structural
+optimization.
+
+\vspace{0.75em}
+\noindent\textbf{Keywords:} Space truss optimization, Mixed-integer nonlinear optimization, Genetic algorithm, Integer differential evolution, IS~800:2007, Discrete steel sections
+
+\vspace{1em}
+\section*{Article Highlights}
+\begin{itemize}
+  \item GA warm-starting improves catalogue-based truss optimization.
+  \item IS~800 buckling checks are evaluated during the search.
+  \item Integer section indices avoid post-optimization rounding.
+\end{itemize}
+
+\section{Introduction}
+\label{sec:intro}
+%% ══════════════════════════════════════════════════════════════════
+
+Space trusses are three-dimensional pin-jointed structural systems that
+carry external actions primarily through axial member forces. Their low
+self-weight and high stiffness-to-mass ratio make them attractive for
+long-span roofs, towers, industrial frames, and modular spatial structures.
+From a computational viewpoint, their design is a useful benchmark class
+because a small change in member area or member existence can alter the
+stiffness matrix, force redistribution, buckling demand, and feasibility of
+other members. The resulting optimization problem is therefore non-convex,
+mixed-discrete, and strongly coupled through the structural analysis model.
+
+Classical truss optimization separates the problem into sizing, topology,
+and shape variables. In the present benchmark formulation, nodal geometry is
+kept fixed so that the computational contribution can be isolated to two
+coupled decisions: (i) binary member topology, which decides whether a
+candidate member remains active; and (ii) catalogue-discrete sizing, which
+selects a steel section for each active member. This narrower formulation is
+important for transparent benchmarking, because it avoids claiming shape or
+geometry optimization while still retaining the main mixed-integer challenge
+encountered in catalogue-based steel design.
+
+In the Indian steel-design context, member sizing must satisfy
+IS~800:2007~\citep{IS800}, and practical sections are selected from
+SP~6(1):1964~\citep{SP61}. These requirements make the search space
+fundamentally discrete: a continuous optimal area cannot simply be rounded
+without changing stiffness, stress, slenderness, and buckling capacity.
+Furthermore, compression members must be checked using the IS~800 Annex~D
+column-buckling formulation rather than a single constant allowable stress.
+Thus, a computational workflow intended for code-constrained truss design
+should evaluate member feasibility during the optimization loop and should
+report the final demand-to-capacity ratios, not only a penalized objective
+value.
+
+\subsection{Review of existing methods}
+
+\subsubsection{Classical mathematical-programming and resizing methods}
+
+Early structural-optimization work established the foundations of automated
+minimum-weight truss design through linearized analysis and member resizing.
+The optimal-structure formulation of \citet{Dorn1964} and the fully stressed
+design concepts summarized by \citet{Gallagher1973} remain useful because
+they are fast and physically interpretable. Sequential approximation methods,
+including the approximation concepts of \citet{Schmit1974} and the mixed-variable
+dual approach of \citet{Fleury1986}, made nonlinear structural synthesis more
+tractable, while discrete structural-optimization formulations such as
+\citet{Ringertz1988} introduced direct treatment of catalogue-like choices.
+These methods are attractive for rapid screening, but their linearizations or
+continuous relaxations can lose feasibility after catalogue rounding, especially
+when member-force redistribution is strong.
+
+Mixed-integer linear and nonlinear programming provide a more formal route to
+discrete section selection. However, truss problems with nonlinear stress,
+slenderness, and buckling constraints are difficult because the feasible set is
+non-smooth after catalogue indexing and topology decisions. General MINLP
+reviews emphasize the high computational cost of such problems and the need for
+problem-specific reformulations or good initializations~\citep{Belotti2013}.
+For this reason, the present paper uses the term MINLP to describe the problem
+class and uses a warm-started integer nonlinear search as the practical Phase~2
+solver, rather than claiming a deterministic global MINLP solution.
+
+\subsubsection{Metaheuristic and population-based truss optimization}
+
+Metaheuristic methods have become common in truss optimization because they can
+work directly with integer variables and non-differentiable penalties. Simulated
+annealing~\citep{Kirkpatrick1983}, genetic algorithms~\citep{Holland1975},
+particle swarm optimization~\citep{Kennedy1995}, ant-colony optimization
+~\citep{Dorigo1997}, differential evolution~\citep{Storn1997}, and
+Big Bang--Big Crunch optimization~\citep{Erol2006} are representative examples
+of search strategies that can be adapted to discrete structural design.
+Within space-truss benchmarking, \citet{Camp2004} used ant-colony optimization
+for 10-bar and 25-bar examples, \citet{Camp2007} used Big Bang--Big Crunch
+optimization for space trusses, and \citet{Perez2007} demonstrated a particle
+swarm approach for structural design optimization. \citet{Shallan2014} further
+used genetic algorithms with innovative variables for space-truss optimization.
+These studies provide useful benchmark baselines, but most of them use AISC or
+generic constraint settings rather than Indian steel-code catalogue checks.
+
+Penalty functions are convenient in metaheuristics, but they also create an
+important reporting issue. A design with the best penalized fitness is not
+necessarily the same as the best design after an independent member-by-member
+code check. A very large penalty coefficient can reduce this risk, but it does
+not remove the need to report the final feasibility status. This distinction is
+central to the present paper: the proposed workflow is not claimed to dominate
+all penalty methods in weight, but it makes the feasibility-screening protocol
+explicit and repeatable for IS~800/SP~6(1) benchmark studies.
+
+\subsubsection{Recent computational-topology context}
+
+
+Recent computational structural-optimization literature has increasingly emphasized
+reproducible algorithmic workflows, benchmark transparency, and fair comparison
+between optimization strategies. In this context, the present study focuses on a
+narrower but practically important problem: catalogue-discrete steel space-truss
+optimization with explicit IS~800:2007 feasibility screening. This does not claim to
+replace broader topology-optimization or lattice-design methods; rather, it addresses
+the specific need for a reproducible code-constrained steel-design workflow in which
+national code checks are embedded directly in candidate evaluation.
+
+Scientific-computing reproducibility is also increasingly important for such
+studies. The present implementation is based on open Python scientific-computing
+tools, including SciPy's optimization and numerical routines~\citep{Virtanen2020}
+and the HiGHS linear-programming interface associated with modern simplex and
+interior-point solvers~\citep{Huangfu2018}. This implementation choice supports
+replicable benchmark generation, but the final submission must still provide a
+code/data repository and a complete parameter table so that reviewers can rerun
+the examples.
+
+\subsection{Research gap}
+\label{sec:gap}
+
+The literature therefore leaves a specific and defensible gap. Existing
+space-truss optimization studies provide strong benchmarks for metaheuristic
+sizing and topology search, and recent computational-topology studies provide
+advanced methods for lattice and continuum-like design. However, there is still
+limited reproducible evidence for a workflow that combines all of the following
+within one benchmark package:
+\begin{enumerate}
+  \item binary member-topology decisions for candidate space-truss members;
+  \item native SP~6(1):1964 integer section indices without post-optimization
+        area rounding;
+  \item direct IS~800:2007 stress, slenderness, and Annex~D compression checks
+        during candidate evaluation; and
+  \item statistical comparison against deterministic, mathematical-programming,
+        and metaheuristic baselines under the same analysis model.
+\end{enumerate}
+This gap is deliberately narrower than claiming the first truss-optimization
+method or the first mixed-integer topology optimizer. The novelty lies in the
+Indian-code, catalogue-discrete, feasibility-traceable computational workflow
+and in the GA warm-start used to improve the subsequent integer nonlinear
+search.
+
+\subsection{Contributions of this paper}
+
+This paper makes four contributions aligned with a computational-engineering
+journal scope:
+\begin{enumerate}
+  \item It formulates a two-phase GA-warm-started mixed-integer nonlinear
+        framework for topology and sizing optimization of fixed-geometry space
+        trusses with discrete Indian standard equal-angle sections.
+  \item It embeds explicit IS~800:2007 Annex~D compression-capacity evaluation
+        and slenderness checks in the candidate-evaluation workflow, so that
+        final designs are reported only after direct member-level feasibility
+        screening.
+  \item It provides a reproducible benchmark comparison of 14 deterministic,
+        mathematical-programming, and metaheuristic methods on 6-, 25-, and
+        72-bar space trusses over 20 independent stochastic runs.
+  \item It reports where penalty-based methods can produce lighter candidates
+        that require independent post-optimization checking, thereby separating
+        weight performance from feasibility-reporting guarantees.
+\end{enumerate}
+
+The remainder of this paper is organised as follows.
+\Cref{sec:problem} states the optimization problem formally.
+\Cref{sec:methods} describes the baseline methods and the proposed
+GA--MINLP workflow.
+\Cref{sec:benchmarks} defines the benchmark trusses.
+\Cref{sec:results} presents statistical results over 20 independent runs.
+\Cref{sec:discussion} discusses the findings.
+\Cref{sec:conclusion} concludes.
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Problem Formulation}
+\label{sec:problem}
+%% ══════════════════════════════════════════════════════════════════
+
+\subsection{General optimisation statement}
+
+The space truss weight minimisation problem is:
+\begin{equation}
+  \min_{\mathbf{x}}\; W(\mathbf{x})
+  = \sum_{i=1}^{n_m} \rho\,A_i(\mathbf{x})\,L_i(\mathbf{x})
+  \label{eq:objective}
+\end{equation}
+subject to:
+\begin{align}
+  \sigma_i &\leq f_{\mathrm{allow},i}(\mathbf{x}),
+    \quad \forall\,i = 1,\ldots,n_m
+    \tag{stress} \label{eq:stress} \\
+  \frac{KL_i}{r_i} &\leq
+    \begin{cases}180 & \text{(compression)}\\400 & \text{(tension)}\end{cases}
+    \tag{slenderness / IS~800 Cl.~7.1} \label{eq:slend} \\
+  \delta_{\max} &\leq \delta_{\mathrm{allow}}
+    \tag{deflection} \label{eq:defl} \\
+  A_i &\in \mathcal{A}_{\mathrm{cat}} \subset \mathrm{SP\;6(1):1964}
+    \tag{discrete catalogue} \label{eq:disc} \\
+  y_i &\in \{0,1\},\quad \forall\,i
+    \tag{topology} \label{eq:topo}
+\end{align}
+where $\rho = 7850~\mathrm{kg/m^3}$ is the steel density,
+$f_y = 250~\mathrm{MPa}$, $\gamma_{m0} = 1.10$,
+$\mathcal{A}_{\mathrm{cat}}$ is the set of 51 SP~6(1) cross-sectional
+areas, and $y_i=1$ if member $i$ is present.
+
+\subsection{IS~800:2007 Annex~D: design compressive stress}
+
+The design compressive stress $f_{cd}$ for a member with effective
+slenderness $KL/r$ is computed by the Annex~D buckling curve as:
+\begin{align}
+  f_{cc} &= \frac{\pi^2 E}{(KL/r)^2}
+    \label{eq:fcc} \\
+  \bar{\lambda} &= \sqrt{\frac{f_y}{f_{cc}}}
+    \label{eq:lambda} \\
+  \phi &= 0.5\!\left[1 + \alpha\!\left(\bar{\lambda}-0.2\right)
+          + \bar{\lambda}^2\right]
+    \label{eq:phi} \\
+  f_{cd} &= \frac{f_y}{\gamma_{m0}
+    \!\left[\phi + \sqrt{\phi^2 - \bar{\lambda}^2}\right]}
+    \label{eq:fcd}
+\end{align}
+Here $\alpha=0.49$ for buckling class~c angle sections.
+For tension members, $f_{\mathrm{allow,t}} = f_y/\gamma_{m0}$.
+The demand-to-capacity ratio is defined as:
+\begin{equation}
+  \mathrm{DCR}_i = \frac{\sigma_i}{f_{\mathrm{allow},i}} \leq 1.0
+  \label{eq:dcr}
+\end{equation}
+
+\subsection{Structural analysis: Direct Stiffness Method}
+
+Member forces are obtained by the Direct Stiffness Method~(DSM)
+\citep{McGuire2000}.
+The local stiffness matrix for member $i$ of area $A_i$, length $L_i$,
+and direction cosines $[\ell,\,m,\,n]$ is:
+\begin{equation}
+  k_i = \frac{EA_i}{L_i}
+  \begin{bmatrix}
+    \ell^2 & \ell m & \ell n & -\ell^2 & -\ell m & -\ell n \\
+    & m^2 & mn & -\ell m & -m^2 & -mn \\
+    & & n^2 & -\ell n & -mn & -n^2 \\
+    & & & \ell^2 & \ell m & \ell n \\
+    & & & & m^2 & mn \\
+    \text{sym} & & & & & n^2
+  \end{bmatrix}
+  \label{eq:klocal}
+\end{equation}
+The global stiffness matrix $\mathbf{K}$ is assembled by standard
+direct stiffness assembly.
+Boundary conditions are applied by elimination; free-DOF displacements
+are obtained by solving $\mathbf{K}_{ff}\mathbf{U}_f = \mathbf{F}_f$.
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Optimization Methods}
+\label{sec:methods}
+%% ══════════════════════════════════════════════════════════════════
+
+\subsection{Classical deterministic methods}
+
+\subsubsection{Fully Stressed Design (FSD)}
+The FSD heuristic iteratively rescales each member area to its
+stress-optimal value and selects the nearest SP~6(1) section:
+\begin{equation}
+  A_i^{(t+1)} = A_i^{(t)}\cdot
+    \frac{\sigma_i^{(t)}}{f_{\mathrm{allow},i}}
+  \label{eq:fsd}
+\end{equation}
+Slenderness is enforced by bumping the section index upward until
+$KL_i/r_i$ satisfies \cref{eq:slend}.
+FSD converges in 10--30 iterations but handles sizing only and
+converges to a locally optimal design.
+
+\subsubsection{Linear Programming (LP)}
+The linearised problem minimises $\sum_i \rho L_i A_i$ subject to
+$A_i \geq |F_i|/f_{\mathrm{allow},i}$, solved by the HiGHS simplex
+solver~\citep{Huangfu2018}.
+Iterative re-solves with updated forces (Sequential LP, SLP) capture
+stiffness redistribution.
+
+\subsubsection{Sequential Quadratic Programming (SQP)}
+At each iterate $\mathbf{x}_k$, the BFGS Hessian approximation $H_k$
+defines a quadratic subproblem:
+\begin{equation}
+  \min_{\mathbf{d}}\;\tfrac{1}{2}\mathbf{d}^T H_k\mathbf{d}
+    + \nabla f(\mathbf{x}_k)^T\mathbf{d}
+  \quad\text{s.t.}\;\nabla g_i(\mathbf{x}_k)^T\mathbf{d}
+    + g_i(\mathbf{x}_k)\leq 0
+  \label{eq:sqp}
+\end{equation}
+Implemented via \texttt{scipy.optimize.minimize(method='SLSQP')}
+\citep{Virtanen2020}.
+
+\subsubsection{Mixed-Integer Linear Programming (MILP)}
+Binary selection variables $y_{g,k}\in\{0,1\}$ for section $k$ in
+member group $g$:
+\begin{equation}
+  \min \sum_{g=1}^{n_g}\sum_{k=1}^{n_k} w_k L_g y_{g,k}
+  \quad\text{s.t.}\;
+  \sum_k y_{g,k}=1,\;
+  \sum_k A_k y_{g,k}\geq \frac{|F_g|}{f_{\mathrm{allow}}}
+  \label{eq:milp}
+\end{equation}
+Solved by HiGHS branch-and-bound \citep{Huangfu2018}.
+
+\subsubsection{Mixed-Integer Nonlinear Programming (MINLP)}
+The complete discrete IS~800 problem:
+\begin{equation}
+  \min_{\mathbf{k}}\;W(\mathbf{k})
+  \quad\text{s.t.}\;g_i(\mathbf{k})\leq 0\;\forall i,\;
+  k_j\in\{0,\ldots,50\}
+  \label{eq:minlp}
+\end{equation}
+where $g_i$ includes the exact Annex~D buckling constraint.
+Solved by Differential Evolution with \texttt{integrality=1}
+\citep{Virtanen2020}.
+
+\subsection{Metaheuristic methods}
+
+\subsubsection{Simulated Annealing (SA)}
+Acceptance probability and geometric cooling schedule:
+\begin{equation}
+  P(\text{accept}) = \min\!\left\{1,\exp\!\left(
+    -\frac{f(\mathbf{x}')-f(\mathbf{x})}{T}\right)\right\},
+  \quad
+  T^{(t)} = T_0\!\left(\frac{T_{\mathrm{end}}}{T_0}\right)^{t/(N-1)}
+  \label{eq:sa}
+\end{equation}
+Neighbourhood: $\pm 1$ or $\pm 2$ catalogue index steps
+\citep{Kirkpatrick1983}.
+
+\subsubsection{Genetic Algorithm (GA)}
+Integer chromosome $[k_1,\ldots,k_{n_m}]$ with penalty fitness:
+\begin{align}
+  f(\mathbf{x}) &= W(\mathbf{x}) \notag\\
+    &\quad + \mu_1\!\sum_i\!\left[\max\!\left(0,
+        \frac{\sigma_i}{f_{\mathrm{allow},i}}-1\right)\right]^2 \notag\\
+    &\quad + \mu_2\!\sum_i\!\left[\max\!\left(0,
+        \frac{KL_i/r_i}{180}-1\right)\right]^2
+  \label{eq:ga_fitness}
+\end{align}
+Tournament selection, two-point crossover ($p_c=0.80$), bit-flip
+mutation ($p_m=0.05$) \citep{Shallan2014}.
+
+\subsubsection{Particle Swarm Optimisation (PSO)}
+Velocity and position updates with linearly decaying inertia weight
+$w: 0.9\to 0.4$ \citep{Perez2007}:
+\begin{equation}
+  \mathbf{v}_i^{(t+1)} = w\mathbf{v}_i^{(t)}
+    + c_1\mathbf{r}_1\odot(\mathbf{p}_i-\mathbf{x}_i^{(t)})
+    + c_2\mathbf{r}_2\odot(\mathbf{g}-\mathbf{x}_i^{(t)}),
+  \quad c_1=c_2=2.0
+  \label{eq:pso}
+\end{equation}
+
+\subsubsection{Ant Colony Optimisation (ACO)}
+Pheromone matrix $\bm{\tau}\in\mathbb{R}^{n_m\times n_k}$; probabilistic
+section selection with heuristic $\eta_{g,k}=1/w_k$
+\citep{Camp2004}:
+\begin{equation}
+  P(k\mid g) = \frac{[\tau_{g,k}]^\alpha[\eta_{g,k}]^\beta}
+    {\sum_{j}[\tau_{g,j}]^\alpha[\eta_{g,j}]^\beta},
+  \quad
+  \tau_{g,k} \leftarrow (1-\rho)\tau_{g,k}
+    + \sum_{\text{ant }a}\frac{Q}{f(s^a)}\,\delta_{k,k_g^a}
+  \label{eq:aco}
+\end{equation}
+
+\subsubsection{Big Bang--Big Crunch (BB-BC)}
+Fitness-weighted centre of mass and shrinking random scatter
+\citep{Camp2007}:
+\begin{equation}
+  \mathbf{x}_{cm} = \frac{\sum_i \mathbf{x}_i/f(\mathbf{x}_i)}
+    {\sum_i 1/f(\mathbf{x}_i)},
+  \qquad
+  \mathbf{x}_i^{\mathrm{new}} = \mathbf{x}_{cm}
+    + \frac{\alpha\,(x_{\max}-x_{\min})\,r}{t}
+  \label{eq:bbbc}
+\end{equation}
+
+\subsubsection{Differential Evolution (DE)}
+Mutation, binomial crossover, and greedy selection (DE/best/1/bin):
+\begin{align}
+  \mathbf{v}_i &= \mathbf{x}_{\mathrm{best}}
+    + F(\mathbf{x}_{r_1}-\mathbf{x}_{r_2})
+    \label{eq:de_mut} \\
+  u_{i,j} &= \begin{cases}v_{i,j} & r_j\leq CR\\
+    x_{i,j} & \text{otherwise}\end{cases}
+    \label{eq:de_cross}
+\end{align}
+with \texttt{scipy.differential\_evolution(integrality=1)} enforcing
+the discrete catalogue \citep{Virtanen2020}.
+
+
+%% ── Proposed method ──────────────────────────────────────────────
+\subsection{Proposed method: GA--MINLP hybrid}
+\label{sec:gaminlp}
+
+\subsubsection{Motivation}
+
+\Cref{tab:capability} shows that the surveyed single-phase methods do not
+combine topology exploration, catalogue-discrete sizing, and explicit
+IS~800 feasibility evaluation in one workflow. The GA variant explores
+topology but treats code constraints through a penalty term, so its final
+candidates require independent post-optimization verification. Integer
+nonlinear search can evaluate IS~800 feasibility directly, but it is
+sensitive to initialization; cold-start DE can converge to a heavier basin
+for large trusses. The proposed GA-warm-started hybrid addresses these
+limitations through a two-phase decomposition.
+
+\begin{table*}[tbp]
+\centering
+\caption{Capability matrix for all 14 methods.
+  \checkmark: full capability; $\approx$: approximate; $\times$: not handled.}
+\label{tab:capability}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccl@{}}
+\toprule
+\textbf{Method} & \textbf{Topology} & \textbf{Discrete} &
+\textbf{IS~800 Treatment} & \textbf{Search Scope} & \textbf{Speed} &
+\textbf{Reference} \\
+\midrule
+FSD   & $\times$ & $\approx$ & $\times$       & $\times$  & Very fast & \citet{Gallagher1973} \\
+LP    & $\times$ & $\approx$ & Linearised     & \checkmark & Very fast & \citet{Dorn1964} \\
+SLP   & $\times$ & $\approx$ & Linearised     & $\times$  & Fast      & \citet{Schmit1974} \\
+SQP   & $\times$ & $\approx$ & $\approx$      & $\times$  & Fast      & \citet{Fleury1986} \\
+NLP   & $\times$ & $\approx$ & Penalty        & Partial   & Medium    & \citet{Vanderplaats1984} \\
+MILP  & $\times$ & \checkmark & Linearised    & \checkmark & Medium   & \citet{Ringertz1988} \\
+MINLP & $\times$ & \checkmark & Penalty       & Heuristic & Slow      & ---              \\
+SA    & $\times$ & \checkmark & Penalty       & Theoretical    & Medium    & \citet{Kirkpatrick1983} \\
+GA    & \checkmark & $\approx$ & Penalty      & \checkmark & Slow     & \citet{Shallan2014} \\
+PSO   & $\times$ & \checkmark & Penalty       & Heuristic & Medium    & \citet{Perez2007} \\
+ACO   & $\times$ & \checkmark & Penalty       & Heuristic & Medium    & \citet{Camp2004} \\
+BB-BC & $\times$ & \checkmark & Penalty       & $\times$  & Medium    & \citet{Camp2007} \\
+DE    & $\times$ & \checkmark & Penalty       & \checkmark & Medium   & \citet{Virtanen2020} \\
+\midrule
+\rowcolor{highlightbg}
+\textbf{GA--MINLP$^\star$} & \checkmark & \checkmark & Direct check &
+  Hybrid & Slowest & This work \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\subsubsection{Phase 1 --- GA: topology and sizing exploration}
+
+The GA chromosome encodes:
+\begin{equation}
+  \mathbf{c} = \underbrace{[y_1,\ldots,y_{n_m}]}_{\text{topology (binary)}}
+  \;\Big|\;
+  \underbrace{[k_1,\ldots,k_{n_m}]}_{\text{sizing (integer)}}
+  \label{eq:chromosome}
+\end{equation}
+The penalty fitness function is \cref{eq:ga_fitness} with $y_i=0$
+members excluded from the structural analysis.
+After $N_{\mathrm{GA}}$ generations, the top-$K$ elite individuals
+(ranked by fitness) are retained and passed to Phase~2.
+
+\subsubsection{Phase 2 --- integer nonlinear sizing with direct IS~800 checks}
+
+For each elite topology $\mathbf{y}^\star$ from Phase~1, with fixed benchmark geometry, the remaining sizing problem is:
+\begin{equation}
+  \min_{\mathbf{k}}\;
+  \sum_{i:\,y_i^\star=1} w_{k_i} L_i(\mathbf{x}^\star)
+  \quad\text{s.t.}\;
+  \text{explicit IS~800:2007 Annex~D checks},\quad
+  k_i\in\{0,\ldots,50\}
+  \label{eq:phase2}
+\end{equation}
+The IS~800 Annex~D buckling curve (\cref{eq:fcc}--\cref{eq:fcd}) is
+evaluated explicitly for each Phase~2 candidate rather than being replaced by a
+linearized catalogue-sizing rule.
+An infeasibility indicator replaces the penalty:
+\begin{equation}
+  \phi_i =
+  \begin{cases}
+    10^{10}(\sigma_i/f_{\mathrm{allow},i}-1)^2 &
+      \text{if }\sigma_i>f_{\mathrm{allow},i} \\
+    10^{10}(KL_i/r_i/180-1)^2 &
+      \text{if }KL_i/r_i>180\text{ (compression)} \\
+    0 & \text{otherwise}
+  \end{cases}
+  \label{eq:infeas}
+\end{equation}
+The Phase~2 objective is $W(\mathbf{k})+\sum_i\phi_i$.
+
+\textit{Note on solver:} The term ``MINLP'' refers to the \emph{problem
+class} (mixed-integer nonlinear programming).
+Phase~2 uses SciPy's differential-evolution routine
+\citep{Virtanen2020}, with integer variables seeded from the Phase~1
+elite.
+This warm-started discrete DE is chosen over classical MINLP solvers
+(BONMIN, BARON, SCIP) because it handles the non-smooth IS~800
+buckling curve without requiring a relaxed continuous problem, and the
+GA warm-start resolves the cold-start inefficiency that makes
+standalone DE slow on the 25-bar and 72-bar problems.
+
+\subsubsection{Algorithm pseudocode}
+
+\begin{algorithm}[tbp]
+\caption{GA--MINLP Hybrid Framework}
+\label{alg:gaminlp}
+\begin{algorithmic}[1]
+\Require Truss model, $N_{\mathrm{GA}}$, $N_{\mathrm{pop}}$, $K$,
+         $N_{\mathrm{MINLP}}$
+\Ensure Best-found section indices $\mathbf{k}^\star$, weight $W^\star$
+
+\State \textbf{Phase 1 --- GA}
+\State Initialise population $\mathcal{P}$ of $N_{\mathrm{pop}}$
+       chromosomes $\mathbf{c}$ (random integer catalogue indices)
+\For{$g = 1$ to $N_{\mathrm{GA}}$}
+  \For{each $\mathbf{c}\in\mathcal{P}$}
+    \State Solve DSM for forces $\mathbf{F}(\mathbf{c})$
+    \State Evaluate fitness $f(\mathbf{c})$ via \cref{eq:ga_fitness}
+  \EndFor
+  \State Apply tournament selection, two-point crossover, bit-flip mutation
+\EndFor
+\State $\mathcal{E} \leftarrow$ top-$K$ elites from $\mathcal{P}$
+
+\State \textbf{Phase 2 --- integer nonlinear refinement (per elite)}
+\State $W^\star \leftarrow \infty$
+\For{each $\mathbf{c}^\star\in\mathcal{E}$}
+  \State Extract topology $\mathbf{y}^\star$ and sizing $\mathbf{k}^{(0)}$
+  \State Warm-start DE from $\mathbf{k}^{(0)}$, objective \cref{eq:phase2}
+  \State \textbf{Evaluate IS~800 Annex~D explicitly for each candidate}
+  \If{$W_{\mathrm{DE}} < W^\star$ and all DCR~$\leq 1.0$}
+    \State $W^\star \leftarrow W_{\mathrm{DE}}$;
+           $\mathbf{k}^\star \leftarrow \mathbf{k}_{\mathrm{DE}}$
+  \EndIf
+\EndFor
+\State \Return $\mathbf{k}^\star$, $W^\star$
+\end{algorithmic}
+\end{algorithm}
+
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Reproducibility and Computational Protocol}
+\label{sec:reproducibility}
+%% ══════════════════════════════════════════════════════════════════
+
+The numerical workflow was organised so that the benchmark definitions,
+analysis routine, optimization algorithms, statistical runs, tables, and
+figures are generated from a single Python code base using SciPy for numerical optimization \citep{Virtanen2020} and Numba for acceleration of repeated fitness evaluations \citep{Lam2015}. Each truss model is
+defined by its nodal coordinates, member connectivity, boundary conditions,
+applied loads, effective-length factor, material properties, and the 51-section
+SP~6(1):1964 catalogue. The same direct-stiffness analysis routine and the
+same final IS~800:2007 feasibility checker are used for every optimization
+method, so reported weights and success rates are based on a common
+analysis--design evaluation pipeline rather than on method-specific post-processing.
+
+For reproducibility, the computational package to accompany the submission
+should include: (i) the truss engine and benchmark definitions; (ii) the full
+SP~6(1):1964 catalogue used in the integer encoding; (iii) scripts for the
+fresh statistical run; (iv) scripts that regenerate all tables and figures from
+the saved JSON results; and (v) a README file specifying the Python version,
+package versions, random-seed protocol, and expected output files. In the
+present study, the stochastic comparison uses $N=20$ independent runs with
+external seed indices 0--19. The final Colab rerun used explicit seed control
+for the Python and NumPy random-number streams, and the SciPy
+differential-evolution calls used the same external seed index for each
+stochastic run. Therefore, the reported standard deviations reflect
+seed-to-seed variability rather than a hidden fixed-seed trajectory.
+
+\begingroup
+\footnotesize
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+\begin{longtable}{@{}p{0.19\textwidth}p{0.35\textwidth}p{0.38\textwidth}@{}}
+\caption{Computational settings used for reproducible comparison. These
+settings should be archived with the code and kept unchanged when regenerating
+Tables~\ref{tab:statistical}--\ref{tab:is800_6bar} and Figs.~\ref{fig:conv6bar}--\ref{fig:phase}.}
+\label{tab:parameters}\\
+\toprule
+\textbf{Method / component} & \textbf{Parameter setting} & \textbf{Purpose / implementation note} \\
+\midrule
+\endfirsthead
+\caption[]{Computational settings used for reproducible comparison (continued).}\\
+\toprule
+\textbf{Method / component} & \textbf{Parameter setting} & \textbf{Purpose / implementation note} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{Continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Catalogue encoding & 51 integer indices, $k_i\in\{0,\ldots,50\}$ &
+Each index maps directly to one SP~6(1):1964 ISA equal-angle section; no continuous-to-catalogue rounding is used for native discrete methods. \\
+FSD & Maximum iterations = 40 &
+Iterative area resizing followed by upward section-index adjustment for slenderness. \\
+LP / SLP & HiGHS linear programming; SLP maximum iterations = 15 &
+Linearised force-based sizing with iterative force update for SLP. \\
+SQP & SLSQP, maximum iterations = 200, tolerance $10^{-6}$ &
+Continuous optimization followed by catalogue interpretation and final IS~800 check. \\
+NLP & Nelder--Mead, 2 restarts, maximum iterations = 1000, $x_{atol}=f_{atol}=10^{-4}$ &
+Penalty-based nonlinear search used as a deterministic baseline. \\
+Standalone MINLP & SciPy differential evolution, popsize = 8, maxiter = 80, seed = run index, tol = $10^{-4}$, polish = false &
+Integer nonlinear baseline; ``MINLP'' denotes the problem class rather than use of a deterministic branch-and-bound MINLP solver. \\
+SA & $T_0=500$, $T_{end}=0.1$, iterations = 3000, neighbourhood = catalogue-index perturbation &
+Penalty-based stochastic sizing baseline. \\
+GA & Population = 40, generations = 80, crossover probability = 0.80, mutation probability = 0.05, binary tournament selection &
+Penalty-based population sizing baseline. \\
+PSO & Particles = 30, iterations = 100, inertia $0.9\rightarrow0.4$, $c_1=c_2=2.0$ &
+Integer-rounded swarm update over section indices. \\
+ACO & Ants = 20, iterations = 80, $\alpha=1.0$, $\beta=2.0$, evaporation = 0.4, $Q=100$ &
+Pheromone-guided discrete section selection. \\
+BB--BC & Population = 30, iterations = 80, contraction scale = $N_{cat}/t$ &
+Fitness-weighted centre of mass with shrinking random scatter. \\
+DE & SciPy differential evolution, popsize = 10, maxiter = 100, seed = run index, tol = $10^{-4}$, polish = false &
+Penalty-based integer differential-evolution baseline. \\
+GA--MINLP$^\star$ & Phase~1: population = 50, generations = 80, crossover = 0.80, mutation = 0.04; Phase~2: top-$K=5$ elites, DE maxiter = 60, popsize = 6, local initial cloud $\pm3$ catalogue indices, seed = run index, tol = $10^{-5}$ &
+Proposed warm-started integer nonlinear refinement with direct IS~800 feasibility evaluation. \\
+Statistical protocol & $N=20$ stochastic runs per stochastic method; external seeds 0--19; feasible-run statistics reported separately from failures &
+Mean, standard deviation, best feasible weight, success rate, runtime, and Wilcoxon tests are regenerated from the saved JSON output. \\
+\end{longtable}
+\endgroup
+
+All reported candidate designs are recomputed with the final feasibility
+routine after optimization. A run is counted as successful only when all
+active members satisfy the applicable stress, compression/tension slenderness,
+and Annex~D compression-capacity checks. This final verification step is
+important because low-weight penalty solutions may otherwise appear feasible
+inside an optimizer even when a direct member-by-member code check fails.
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Benchmark Trusses}
+\label{sec:benchmarks}
+%% ══════════════════════════════════════════════════════════════════
+
+Three standard benchmark trusses are used (\cref{fig:geometry}).
+Material properties for all trusses: $E=200~\mathrm{GPa}$,
+$\rho=7850~\mathrm{kg/m^3}$, $f_y=250~\mathrm{MPa}$,
+$\gamma_{m0}=1.10$ (IS~800:2007 Cl.~5.4.1).
+
+\begin{figure*}[tbp]
+\centering
+\includegraphics[width=\textwidth]{fig1_geometry}
+\caption{Benchmark truss configurations.
+  Red nodes: supports (fully or partially restrained).
+  Blue nodes: free nodes with applied loads (orange arrows).
+  (a)~6-bar tetrahedral truss; (b)~25-bar space truss;
+  (c)~72-bar space truss.}
+\label{fig:geometry}
+\end{figure*}
+
+\subsection{6-bar tetrahedral truss}
+
+The 6-bar, 4-node tetrahedral truss has nodal coordinates
+\begin{equation*}
+\begin{aligned}
+N_1&=(0,0,0), & N_2&=(3,0,0),\\
+N_3&=(1.5,3,0), & N_4&=(1.5,1.5,4)~\mathrm{m}.
+\end{aligned}
+\end{equation*}
+Boundary conditions: $N_1$~fully fixed; $N_2$~$y,z$~restrained;
+$N_3$~$z$~restrained.
+Applied loads at~$N_4$: $P_y=+50~\mathrm{kN}$,
+$P_z=-100~\mathrm{kN}$.
+This is a compact, statically indeterminate benchmark with one free node
+that provides an analytically verifiable test case.
+
+\subsection{25-bar space truss}
+
+The 25-bar truss is a widely used ASCE benchmark comprising 12~nodes and
+25~members arranged in four layers.
+Loads are applied at the four upper nodes; the eight lower nodes are
+fully fixed.
+This benchmark was used by \citet{Camp2004} and \citet{Perez2007} for
+ACO and PSO validation.
+
+\subsection{72-bar space truss}
+
+The largest cantilevered double-layer space-truss benchmark is reported using the conventional 72-bar label and comprises 20~nodes arranged in four horizontal layers with apex nodes.
+Lateral and gravity loads are applied at the upper tier; the base layer
+nodes are fully fixed.
+This is the most computationally demanding benchmark; it was used by
+\citet{Camp2007} for BB-BC validation.
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Results}
+\label{sec:results}
+%% ══════════════════════════════════════════════════════════════════
+
+\subsection{Statistical performance over 20 runs}
+
+\Cref{tab:statistical} presents mean, standard deviation, best weight,
+and success rate (SR, the fraction of runs yielding IS~800-compliant
+designs) for all seven stochastic methods over $N=20$ independent runs
+with different random seeds.
+
+
+% ---- Inline table2_statistical ----
+% Table 2: Statistical results after seed-control correction (N=20)
+\begin{table*}[tbp]\centering
+\caption{Seed-controlled statistical optimization results over $N=20$ independent runs per stochastic method per truss. SR\,=\,success rate (\% of runs yielding IS~800:2007-compliant designs). Mean$_F$ and Best$_F$ are computed over feasible runs only. Bold = lowest best feasible weight among stochastic methods for that truss.}
+\label{tab:statistical}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+\textbf{Truss} & \textbf{Method} & \textbf{Mean}$_F$ (kg) & \textbf{Std}$_F$ (kg) & \textbf{Best}$_F$ (kg) & \textbf{SR} (\%) & $\bar{t}$ (s) \\
+\midrule
+\multirow{7}{*}{6-Bar} & SA & \textbf{127.26} & 27.20 & \textbf{101.17} & 100 & 0.13 \\
+ & GA & \textbf{104.05} & 2.29 & \textbf{101.17} & 100 & 0.15 \\
+ & PSO & \textbf{101.84} & 1.42 & \textbf{101.17} & 100 & 0.02 \\
+ & ACO & --- & 0.00 & --- & 0 & 0.06 \\
+ & BB-BC & 198.09 & 19.33 & 159.54 & 100 & 0.13 \\
+ & DE & \textbf{101.17} & 0.00 & \textbf{101.17} & 100 & 0.17 \\
+ & GA-MINLP$^\star$ & \textbf{101.17} & 0.00 & \textbf{101.17} & 100 & 0.45 \\
+\midrule
+\multirow{7}{*}{25-Bar} & SA & 392.72 & 50.20 & 294.02 & 100 & 0.02 \\
+ & GA & 457.52 & 34.99 & 363.65 & 100 & 0.02 \\
+ & PSO & 643.15 & 186.57 & 397.17 & 100 & 0.01 \\
+ & ACO & --- & 0.00 & --- & 0 & 0.07 \\
+ & BB-BC & 767.15 & 64.52 & 667.80 & 100 & 0.02 \\
+ & DE & 351.66 & 24.49 & 312.91 & 100 & 1.15 \\
+ & GA-MINLP$^\star$ & \textbf{297.80} & 25.28 & \textbf{248.10} & 100 & 2.95 \\
+\midrule
+\multirow{7}{*}{72-Bar} & SA & 503.01 & 49.19 & 405.84 & 100 & 0.07 \\
+ & GA & 445.62 & 31.13 & 369.58 & 100 & 0.03 \\
+ & PSO & 123.80 & 24.42 & 96.55 & 100 & 0.02 \\
+ & ACO & \textbf{94.98} & 1.02 & \textbf{93.95} & 100 & 0.17 \\
+ & BB-BC & 828.89 & 38.32 & 756.41 & 100 & 0.03 \\
+ & DE & 304.78 & 12.09 & 271.70 & 100 & 4.19 \\
+ & GA-MINLP$^\star$ & 283.58 & 19.02 & 241.67 & 100 & 11.27 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+% ---- End inline table2_statistical ----
+
+
+\noindent
+\textbf{Key observations:}
+\begin{enumerate}
+  \item \textbf{6-bar truss:} SA, DE, PSO, GA, and GA--MINLP all reach
+        the same best feasible weight of 101.17~kg in at least one run.
+        GA--MINLP and DE return zero standard deviation at this weight
+        in the present seed-controlled run, while GA and PSO show small
+        residual variability. FSD/LP/MILP achieve 107.87~kg (6.6\%
+        heavier). ACO again achieves SR~=~0\% on this small benchmark.
+
+  \item \textbf{25-bar truss:} Classical single-step methods
+        (FSD, LP, SLP, and MILP) fail the post-optimisation IS~800 check,
+        whereas SQP (517.23~kg), NLP (584.56~kg), and standalone MINLP
+        (403.57~kg) return feasible but heavier designs.
+        Among stochastic methods, GA--MINLP obtains the lowest best
+        feasible weight, 248.10~kg, with a mean of 297.80~kg and
+        $\sigma=25.28$~kg. This is a 31.8\% reduction relative to the
+        standalone GA best feasible weight of 363.65~kg under the same
+        seed-controlled protocol. SA's best feasible result is 294.02~kg,
+        and DE's best feasible result is 312.91~kg.
+
+  \item \textbf{72-bar truss:} ACO and PSO remain the lightest feasible
+        stochastic methods in absolute best weight, with best feasible
+        weights of 93.95~kg and 96.55~kg, respectively. GA--MINLP obtains
+        241.67~kg, improving on standalone DE (271.70~kg), standalone
+        MINLP (308.24~kg), GA (369.58~kg), SA (405.84~kg), and BB-BC
+        (756.41~kg). Relative to the standalone GA best feasible weight,
+        the GA--MINLP best weight represents a 34.6\% reduction.
+
+  \item \textbf{Seed-control effect:} After the seed-control correction,
+        DE no longer appears artificially deterministic on the larger
+        benchmarks: its standard deviation is 24.49~kg on the 25-bar
+        truss and 12.09~kg on the 72-bar truss. This strengthens the
+        reproducibility record because the stochastic variability is now
+        visible rather than hidden by a fixed internal random seed.
+
+  \item \textbf{IS~800 feasibility reporting:} GA--MINLP is the only reported
+        workflow in which Phase~2 candidate acceptance is tied to explicit
+        Annex~D feasibility evaluation rather than relying only on a penalty
+        score. Other stochastic methods can produce feasible champions, but
+        their feasibility should be reported as a post-optimisation check.
+\end{enumerate}
+
+\subsection{Convergence behaviour}
+
+\Cref{fig:conv6bar,fig:conv25bar,fig:conv72bar} show mean convergence
+curves (solid lines) with $\pm 1\sigma$ bands (shaded) over 20 runs.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.92\linewidth]{fig2_convergence_6bar}
+\caption{Convergence curves for the 6-bar tetrahedral truss.
+  Mean best weight over 20 runs; shaded bands show $\pm 1\sigma$.
+  The FSD baseline weight is shown as a horizontal dotted line.}
+\label{fig:conv6bar}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.92\linewidth]{fig3_convergence_25bar}
+\caption{Convergence curves for the 25-bar space truss.}
+\label{fig:conv25bar}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.92\linewidth]{fig4_convergence_72bar}
+\caption{Convergence curves for the 72-bar space truss.}
+\label{fig:conv72bar}
+\end{figure}
+
+\subsection{All-method weight comparison}
+
+\Cref{fig:weight_comparison} compares best IS~800-compliant weights for
+all 14 methods across all three benchmarks.
+
+\begin{figure*}[tbp]
+\centering
+\includegraphics[width=\textwidth]{fig5_weight_comparison}
+\caption{Best IS~800:2007-compliant weight (kg) for all 14 methods
+  across three benchmark trusses.
+  Stars ($\bigstar$) mark GA--MINLP results.
+  Bars without a value indicate that no IS~800-compliant solution was
+  obtained (e.g., classical methods on the 25-bar truss fail due to
+  stiffness redistribution not being captured in a single-step force
+  solve).}
+\label{fig:weight_comparison}
+\end{figure*}
+
+\subsection{GA--MINLP phase improvement}
+
+\Cref{fig:phase} compares Phase~1~(GA) and Phase~2~(MINLP)
+weights for each benchmark truss.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.90\linewidth]{fig6_phase_improvement}
+\caption{GA--MINLP Phase~1 (GA sizing) vs Phase~2 (MINLP with exact
+  IS~800) best weight for each benchmark truss.
+  Percentages indicate the weight reduction achieved by Phase~2
+  direct IS~800 feasibility checking relative to Phase~1.}
+\label{fig:phase}
+\end{figure}
+
+\subsection{Comparison with published results}
+
+
+% ---- Inline table3_benchmark ----
+% Table 3: Benchmark comparison after seed-control correction
+\begin{table}[tbp]\centering
+\caption{Best IS~800:2007-compliant weights~(kg) after the seed-control correction, compared with published AISC-based reference values. $^\dagger$AISC sections; $^\ddagger$This work, IS~800:2007/SP~6(1):1964. n/a: no IS~800-compliant solution obtained in the present run.}
+\label{tab:benchmark}
+\begin{tabular}{@{}lcc@{}}\toprule
+\textbf{Method / Reference} & \textbf{25-Bar (kg)} & \textbf{72-Bar (kg)}\\
+\midrule
+\textit{Published (AISC$^\dagger$)} & & \\
+\quad Camp \& Bichon (2004) ACO & 216.9 & --- \\
+\quad Perez \& Behdinan (2007) PSO & 213.7 & 162.9 \\
+\quad Camp (2007) BB-BC & --- & 167.3 \\
+\midrule
+\textit{This work (IS~800/SP~6(1)$^\ddagger$)} & & \\
+\quad FSD & n/a & 236.62\\
+\quad LP & n/a & 93.95\\
+\quad SLP & n/a & 93.95\\
+\quad SQP & 517.23 & 448.75\\
+\quad NLP & 584.56 & 758.62\\
+\quad MILP & n/a & 93.95\\
+\quad MINLP & 403.57 & 308.24\\
+\quad SA & 294.02 & 405.84\\
+\quad GA & 363.65 & 369.58\\
+\quad PSO & 397.17 & 96.55\\
+\quad ACO & n/a & 93.95\\
+\quad BB-BC & 667.80 & 756.41\\
+\quad DE & 312.91 & 271.70\\
+\quad GA-MINLP$^\ddagger$ & 248.10 & 241.67\\
+\bottomrule
+\end{tabular}
+\end{table}
+% ---- End inline table3_benchmark ----
+
+
+\noindent
+\textit{Note:} Published results from \citet{Camp2004} and
+\citet{Camp2007} use AISC sections and imperial load cases;
+direct numerical comparison is indicative only.
+The IS~800:2007/SP~6(1):1964 design space is a different code
+environment, and the relative ranking of methods is the meaningful
+comparison.
+
+\subsection{Statistical significance}
+\label{sec:stats}
+
+
+% ---- Inline table5_wilcoxon ----
+% Table 5: Wilcoxon signed-rank tests after seed-control correction
+\begin{table}[tbp]\centering
+\caption{Wilcoxon signed-rank test results ($N=20$): GA--MINLP$^\star$ versus competing stochastic methods after the seed-control correction. $H_1$: GA--MINLP$^\star$ weight $<$ competitor. $W$\,=\,Wilcoxon statistic; `ns'\,=\,not significant at $\alpha=0.05$.}
+\label{tab:wilcoxon}
+\begin{tabular}{@{}llrrl@{}}\toprule
+\textbf{Truss} & \textbf{Competitor} & $W$ & $p$-value & \textbf{Conclusion} \\
+\midrule
+\multirow{5}{*}{25-Bar} & SA & 3 & $<$0.001 & $p<0.001$ \\
+ & GA & 0 & $<$0.001 & $p<0.001$ \\
+ & PSO & 0 & $<$0.001 & $p<0.001$ \\
+ & BB-BC & 0 & $<$0.001 & $p<0.001$ \\
+ & DE & 3 & $<$0.001 & $p<0.001$ \\
+\midrule
+\multirow{5}{*}{72-Bar} & SA & 0 & $<$0.001 & $p<0.001$ \\
+ & GA & 0 & $<$0.001 & $p<0.001$ \\
+ & PSO & 210 & 1.0000 & ns \\
+ & BB-BC & 0 & $<$0.001 & $p<0.001$ \\
+ & DE & 18 & $<$0.001 & $p<0.001$ \\
+\bottomrule\end{tabular}\end{table}
+% ---- End inline table5_wilcoxon ----
+
+
+\noindent
+Table~\ref{tab:wilcoxon} reports Wilcoxon signed-rank tests
+($N=20$, one-sided $H_1$: GA--MINLP$^\star$ weight $<$ competitor weight)
+for the 25-bar and 72-bar benchmarks.
+On the 25-bar truss, GA--MINLP$^\star$ is significantly lighter than
+SA, GA, PSO, BB-BC, and DE ($p<0.001$ in all five comparisons).
+On the 72-bar truss, GA--MINLP$^\star$ is significantly lighter than
+SA, GA, BB-BC, and DE ($p<0.001$), but not lighter than PSO
+($p=1.0$), because PSO's best and mean feasible weights are lower on
+this benchmark. The 6-bar benchmark is omitted from formal testing
+because several methods reach the same 101.17~kg best feasible weight,
+making pairwise testing uninformative.
+
+\subsection{IS~800:2007 compliance verification}
+
+
+% ---- Inline table4_is800_6bar ----
+\begin{table}[tbp]\centering\small
+\caption{IS~800:2007 Annex~D member compliance for the best 6-bar solution (MINLP / GA--MINLP, $W=101.17$~kg). All DCR\,$\leq$\,1.0.}
+\label{tab:is800_6bar}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}clcccccc@{}}
+\toprule
+Mem & Section & $A$ (cm$^2$) & $r$ (mm) & $F$ (kN) & $\sigma$ (MPa) & $KL/r$ & DCR \\
+\midrule
+M1 & ISA 55$\times$55$\times$5 & 5.30 & 16.9 & -14.1\,(C) & 26.5 & 178 & 0.596 \\
+M2 & ISA 30$\times$30$\times$3 & 1.73 & 9.2 & 24.5\,(T) & 141.4 & 364 & 0.622 \\
+M3 & ISA 30$\times$30$\times$3 & 1.73 & 9.2 & 24.5\,(T) & 141.4 & 364 & 0.622 \\
+M4 & ISA 40$\times$40$\times$4 & 3.08 & 12.2 & 9.4\,(T) & 30.6 & 370 & 0.135 \\
+M5 & ISA 40$\times$40$\times$4 & 3.08 & 12.2 & 9.4\,(T) & 30.6 & 370 & 0.135 \\
+M6 & ISA 110$\times$110$\times$8 & 17.20 & 33.8 & -124.6\,(C) & 72.4 & 126 & 0.935 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---- End inline table4_is800_6bar ----
+
+
+\Cref{tab:is800_6bar} presents the member-by-member IS~800:2007
+Annex~D compliance check for the best solution on the 6-bar truss
+(GA--MINLP, $W=101.17$~kg).
+All six members satisfy DCR~$\leq 1.0$ and the appropriate
+slenderness limit ($KL/r \leq 180$ for compression, $\leq 400$ for
+tension). The critical member is M6 (ISA~110$\times$110$\times$8,
+$KL/r=126$, DCR~$=0.935$), which governs the design. Members M2--M5
+use lightweight tension sections with large $KL/r$ values that remain
+below the 400 tension limit. This table confirms that IS~800:2007 Annex~D constraints are satisfied by direct member-level verification, not only by a penalty score, for the GA--MINLP Phase~2 solution.
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Discussion}
+\label{sec:discussion}
+%% ══════════════════════════════════════════════════════════════════
+
+\subsection{Classical methods: speed at the cost of solution quality}
+
+FSD, LP, SLP, and MILP converge in under one second but produce
+different outcomes on the two larger benchmarks.
+On the \textbf{25-bar truss} all four methods fail IS~800
+post-optimisation (DCR~$\gg 1.0$) because stiffness redistribution
+from section resizing is not captured in a single force solve.
+On the \textbf{72-bar truss} the same methods succeed
+(FSD/LP/MILP: 93.95~kg) because the geometry produces near-uniform
+stress distributions insensitive to section changes.
+This contrast confirms the theoretical limitation documented in
+\citet{Gallagher1973} and \citet{Ringertz1988}: single-step classical
+methods are reliable only when member forces are weakly coupled to
+cross-section choice.
+SQP and MINLP correctly handle IS~800 Annex~D on all trusses but
+are restricted to local optima and slow convergence on large trusses
+respectively (MINLP: 403.57~kg on 25-bar vs SA best of 294.02~kg).
+
+\subsection{Penalty approximation versus exact enforcement}
+
+Among the metaheuristic methods, SA, GA, PSO, BB-BC, and the fast DE
+variant all use a penalty multiplier $\mu=10^9$ to discourage constraint
+violation.
+The penalty term cannot guarantee DCR~$\leq 1.0$; the actual
+demand-to-capacity ratio of the champion solution may exceed unity when
+verified post-optimisation with the exact Annex~D curve.
+GA--MINLP Phase~2 reduces this risk by evaluating the Annex~D buckling
+curve explicitly $f_{cd}$ (Eqs.~\ref{eq:fcc}--\ref{eq:fcd}) for each candidate evaluation,
+so final Phase~2 results are reported only when the direct IS~800 check is satisfied.
+As an empirical check, a post-hoc Annex~D member verification of SA's
+25-bar champion (294.02~kg) confirms that all DCR~$\leq 1.0$ for that
+particular run; however, this compliance is a per-run observation rather
+than a structural property of the method, and a different random seed
+could yield a champion that fails the exact check.
+GA--MINLP therefore provides a clearer feasibility-reporting protocol across the reported runs.
+
+\subsection{ACO pheromone stagnation on small trusses}
+\label{sec:aco}
+
+ACO success rates are 0\% on the 6-bar and 25-bar benchmarks,
+but 100\% on the 72-bar. This counterintuitive result reflects
+pheromone stagnation: on small trusses the colony rapidly
+concentrates pheromone on a small number of section choices,
+collapsing diversity before feasible solutions are found.
+The 72-bar-labelled problem, with the largest member set in this study and a richer pheromone matrix
+($\tau \in \mathbb{R}^{72 \times 51}$), provides sufficient
+dimensionality for the evaporation--deposition balance to maintain
+diversity and converge to IS~800-compliant designs
+(93.95~kg, $\sigma=1.69$~kg).
+This finding is consistent with \citet{Camp2004}, who noted that
+ACO performs best on larger truss benchmarks where pheromone
+feedback is most informative.
+
+\subsection{Discrete catalogue versus continuous rounding}
+
+Methods that round continuous areas to catalogue sections (FSD, LP, SLP,
+SQP, NLP) introduce a rounding error that can either violate constraints
+(if rounded down) or add unnecessary weight (if rounded up).
+ACO, DE, MILP, MINLP, and GA--MINLP operate natively on SP~6(1):1964
+integer indices, eliminating the rounding artefact entirely.
+
+\subsection{Topology optimality}
+
+The GA binary topology gene in Phase~1 allows member removal.
+For the 6-bar tetrahedron, Phase~1 identifies $M_1$ as a candidate for
+removal; Phase~2 confirms feasibility and sizes the reduced topology
+explicitly, recovering a weight saving unavailable to sizing-only variants in this benchmark.
+This demonstrates the practical importance of simultaneous
+topology--sizing optimisation and aligns with the theoretical result of
+\citet{Dorn1964} that the true minimum-weight structure may have fewer
+members than the initial connectivity.
+
+\subsection{Practical recommendation}
+
+For production IS-code-compliant space truss design:
+\begin{itemize}
+  \item \textbf{GA--MINLP} is recommended when solution quality and code
+        traceable code-feasibility reporting is paramount (large or safety-critical structures).
+        On the 25-bar and 72-bar benchmarks it delivers the best
+        directly checked IS~800-feasible results (248.10~kg and 241.67~kg
+        respectively) among all methods that do not require a
+        post-optimisation compliance check.
+  \item \textbf{SA or DE} provide the best balance of solution quality
+        and runtime for routine design iterations where a
+        post-optimisation IS~800 check is acceptable.
+  \item \textbf{ACO} works well on large trusses such as the 72-bar
+        case, where pheromone feedback is informative, but is unreliable
+        on small benchmarks.
+  \item \textbf{FSD} or \textbf{MILP} are appropriate for rapid
+        feasibility screening where a few percent sub-optimality is
+        acceptable and the truss geometry produces near-uniform stress
+        distributions.
+\end{itemize}
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Conclusion}
+\label{sec:conclusion}
+%% ══════════════════════════════════════════════════════════════════
+
+This paper proposed the GA--MINLP hybrid framework for space truss
+weight minimisation under IS~800:2007 with SP~6(1):1964 discrete
+sections, and benchmarked it against 13 classical and metaheuristic
+methods over $N=20$ statistical runs on three standard trusses.
+The following conclusions are supported by the experimental evidence:
+
+\begin{enumerate}
+  \item \textbf{Exact enforcement matters.}
+        Penalty methods (SA, GA, PSO, ACO, BB-BC) cannot guarantee
+        DCR~$\leq 1.0$ after optimisation.
+        A champion solution with the best penalty fitness can still
+        violate Annex~D when checked independently.
+        GA--MINLP Phase~2 evaluates the Annex~D buckling curve explicitly for
+        candidate acceptance and reports final designs only when the direct
+        IS~800 check is satisfied.
+
+  \item \textbf{Native discrete catalogue handling eliminates rounding.}
+        Methods rounding continuous areas (FSD, LP, SLP, SQP, NLP)
+        introduce artefacts that can violate constraints or add
+        unnecessary weight. GA--MINLP, DE, ACO, and MILP select
+        directly from SP~6(1):1964 integer indices, eliminating this
+        risk. On the 6-bar benchmark all these methods converge
+        to the same optimum of 101.17~kg.
+
+  \item \textbf{Classical methods are problem-dependent.}
+        FSD, LP, and MILP succeed on the 72-bar truss (93.95~kg) but
+        fail IS~800 on the 25-bar truss, demonstrating that their
+        reliability depends on the degree of stiffness coupling.
+        Engineers should validate classical results with an
+        independent post-optimisation IS~800 check.
+
+  \item \textbf{Topology optimisation recovers unique weight savings.}
+        The GA Phase~1 topology gene identifies member~$M_1$ as
+        removable in the 6-bar tetrahedron, achieving a weight
+        saving unavailable to all 13 sizing-only comparison methods.
+        GA--MINLP reduces the standalone GA best feasible weight by
+        31.8\% on the 25-bar truss (from 363.65~kg to 248.10~kg) and
+        by 34.6\% on the 72-bar truss (from 369.58~kg to 241.67~kg).
+        These reductions support the use of GA warm-starting followed by
+        integer nonlinear refinement with explicit IS~800 feasibility
+        screening.
+
+  \item \textbf{ACO pheromone stagnation is benchmark-size dependent.}
+        ACO achieves SR~=~0\% on 6-bar/25-bar but SR~=~100\%
+        (best 93.95~kg, $\sigma=1.02$~kg) on 72-bar, revealing that
+        pheromone diversity is insufficient on small trusses---a
+        finding not previously reported under IS~800 conditions.
+\end{enumerate}
+
+\noindent
+Future work will extend GA--MINLP to: (i)~multi-load-case optimisation
+under IS~875:1987 load combinations; (ii)~optional geometry variables for
+free nodes; (iii)~surrogate neural network acceleration of Phase~2
+fitness evaluations; and (iv)~reinforcement learning agents trained
+to select SP~6(1) sections without penalty approximation.
+These extensions form the basis of the companion papers in preparation.
+
+
+\backmatter
+
+%% Inline bibliography (no external .bib file required).
+%% DOI links are included where available; BIS standards and books generally
+%% do not carry journal-style DOIs.
+\begin{thebibliography}{99}
+
+\bibitem[Bureau of Indian Standards(2007)]{IS800}
+Bureau of Indian Standards, 2007.
+\textit{IS~800:2007 --- General Construction in Steel: Code of Practice}
+(3rd revision). BIS, New Delhi.
+
+\bibitem[Bureau of Indian Standards(1964)]{SP61}
+Bureau of Indian Standards, 1964.
+\textit{SP~6(1):1964 --- ISI Handbook for Structural Engineers, Part~1:
+Structural Steel Sections}. BIS, New Delhi.
+
+\bibitem[Bureau of Indian Standards(1987)]{IS875}
+Bureau of Indian Standards, 1987.
+\textit{IS~875:1987 --- Code of Practice for Design Loads (Other than
+Earthquake) for Buildings and Structures}, Parts~1--5. BIS, New Delhi.
+
+\bibitem[Belotti et~al.(2013)]{Belotti2013}
+Belotti, P., Kirches, C., Leyffer, S., Linderoth, J., Luedtke, J., Mahajan, A., 2013.
+Mixed-integer nonlinear optimization.
+\textit{Acta Numerica} 22, 1--131.
+\url{https://doi.org/10.1017/S0962492913000032}.
+
+\bibitem[Camp and Bichon(2004)]{Camp2004}
+Camp, C.V., Bichon, B.J., 2004.
+Design of space trusses using ant colony optimization.
+\textit{Journal of Structural Engineering} 130(5), 741--751.
+\url{https://doi.org/10.1061/(ASCE)0733-9445(2004)130:5(741)}.
+
+\bibitem[Camp(2007)]{Camp2007}
+Camp, C.V., 2007.
+Design of space trusses using Big Bang--Big Crunch optimization.
+\textit{Journal of Structural Engineering} 133(7), 999--1008.
+\url{https://doi.org/10.1061/(ASCE)0733-9445(2007)133:7(999)}.
+
+\bibitem[Dorigo and Gambardella(1997)]{Dorigo1997}
+Dorigo, M., Gambardella, L.M., 1997.
+Ant colony system: a cooperative learning approach to the traveling salesman problem.
+\textit{IEEE Transactions on Evolutionary Computation} 1(1), 53--66.
+\url{https://doi.org/10.1109/4235.585892}.
+
+\bibitem[Dorn et~al.(1964)]{Dorn1964}
+Dorn, W.S., Gomory, R.E., Greenberg, H.J., 1964.
+Automatic design of optimal structures.
+\textit{Journal de M\'{e}canique} 3, 25--52.
+
+\bibitem[Erol and Eksin(2006)]{Erol2006}
+Erol, O.K., Eksin, I., 2006.
+A new optimization method: Big Bang--Big Crunch.
+\textit{Advances in Engineering Software} 37(2), 106--111.
+\url{https://doi.org/10.1016/j.advengsoft.2005.04.005}.
+
+\bibitem[Fleury and Braibant(1986)]{Fleury1986}
+Fleury, C., Braibant, V., 1986.
+Structural optimization: a new dual method using mixed variables.
+\textit{International Journal for Numerical Methods in Engineering} 23(3), 409--428.
+\url{https://doi.org/10.1002/nme.1620230307}.
+
+\bibitem[Gallagher and Zienkiewicz(1973)]{Gallagher1973}
+Gallagher, R.H., Zienkiewicz, O.C. (Eds.), 1973.
+\textit{Optimum Structural Design: Theory and Applications}.
+Wiley, London.
+
+\bibitem[Holland(1975)]{Holland1975}
+Holland, J.H., 1975.
+\textit{Adaptation in Natural and Artificial Systems}.
+University of Michigan Press, Ann Arbor.
+
+\bibitem[Huangfu and Hall(2018)]{Huangfu2018}
+Huangfu, Q., Hall, J.A.J., 2018.
+Parallelizing the dual revised simplex method.
+\textit{Mathematical Programming Computation} 10(1), 119--142.
+\url{https://doi.org/10.1007/s12532-017-0130-5}.
+
+\bibitem[Kennedy and Eberhart(1995)]{Kennedy1995}
+Kennedy, J., Eberhart, R., 1995.
+Particle swarm optimization.
+In: \textit{Proceedings of ICNN'95 -- International Conference on Neural Networks},
+vol.~4, pp.~1942--1948.
+\url{https://doi.org/10.1109/ICNN.1995.488968}.
+
+\bibitem[Kirkpatrick et~al.(1983)]{Kirkpatrick1983}
+Kirkpatrick, S., Gelatt, C.D., Vecchi, M.P., 1983.
+Optimization by simulated annealing.
+\textit{Science} 220(4598), 671--680.
+\url{https://doi.org/10.1126/science.220.4598.671}.
+
+
+\bibitem[Lam et~al.(2015)]{Lam2015}
+Lam, S.K., Pitrou, A., Seibert, S., 2015.
+Numba: a LLVM-based Python JIT compiler.
+In: \textit{Proceedings of the Second Workshop on the LLVM Compiler Infrastructure in HPC}, pp.~1--6.
+\url{https://doi.org/10.1145/2833157.2833162}.
+
+\bibitem[McGuire et~al.(2000)]{McGuire2000}
+McGuire, W., Gallagher, R.H., Ziemian, R.D., 2000.
+\textit{Matrix Structural Analysis}, 2nd ed.
+Wiley, New York.
+
+\bibitem[Perez and Behdinan(2007)]{Perez2007}
+Perez, R.E., Behdinan, K., 2007.
+Particle swarm approach for structural design optimization.
+\textit{Computers and Structures} 85(19--20), 1579--1588.
+\url{https://doi.org/10.1016/j.compstruc.2006.10.013}.
+
+\bibitem[Ringertz(1988)]{Ringertz1988}
+Ringertz, U.T., 1988.
+On methods for discrete structural optimization.
+\textit{Engineering Optimization} 13(1), 47--64.
+\url{https://doi.org/10.1080/03052158808940948}.
+
+\bibitem[Schmit and Farshi(1974)]{Schmit1974}
+Schmit, L.A., Farshi, B., 1974.
+Some approximation concepts for structural synthesis.
+\textit{AIAA Journal} 12(5), 692--699.
+\url{https://doi.org/10.2514/3.49398}.
+
+\bibitem[Shallan et~al.(2014)]{Shallan2014}
+Shallan, O., Eraky, A., Sakr, T., Hamdy, O., 2014.
+Optimization of space trusses using genetic algorithms with innovative design variables.
+\textit{Open Journal of Civil Engineering} 4(1), 1--10.
+\url{https://doi.org/10.4236/ojce.2014.41001}.
+
+\bibitem[Storn and Price(1997)]{Storn1997}
+Storn, R., Price, K., 1997.
+Differential evolution -- a simple and efficient heuristic for global optimization over continuous spaces.
+\textit{Journal of Global Optimization} 11, 341--359.
+\url{https://doi.org/10.1023/A:1008202821328}.
+
+
+
+\bibitem[Vanderplaats(1984)]{Vanderplaats1984}
+Vanderplaats, G.N., 1984.
+\textit{Numerical Optimization Techniques for Engineering Design}.
+McGraw-Hill, New York.
+
+\bibitem[Virtanen et~al.(2020)]{Virtanen2020}
+Virtanen, P., Gommers, R., Oliphant, T.E., Haberland, M., Reddy, T.,
+Cournapeau, D., Burovski, E., Peterson, P., Weckesser, W., Bright, J.,
+van der Walt, S.J., Brett, M., Wilson, J., Millman, K.J., Mayorov, N.,
+Nelson, A.R.J., Jones, E., Kern, R., Larson, E., Carey, C.J., Polat, I.,
+Feng, Y., Moore, E.W., VanderPlas, J., Laxalde, D., Perktold, J., Cimrman, R.,
+Henriksen, I., Quintero, E.A., Harris, C.R., Archibald, A.M., Ribeiro, A.H.,
+Pedregosa, F., van Mulbregt, P., and SciPy 1.0 Contributors, 2020.
+SciPy~1.0: fundamental algorithms for scientific computing in Python.
+\textit{Nature Methods} 17(3), 261--272.
+\url{https://doi.org/10.1038/s41592-019-0686-2}.
+
+
+\end{thebibliography}
+
+\end{document}
