@@ -8,6 +8,12 @@ Target journal: **Engineering with Computers**.
 
 This repository contains Python source code, seed-fixed statistical results, figure files, LaTeX tables, and Springer manuscript files for a computational framework that combines genetic-algorithm warm-starting with integer nonlinear refinement for catalogue-based IS 800:2007-compliant steel space-truss optimization.
 
+
+## Archived release
+
+- GitHub repository: https://github.com/mdaipayan/GA-MINLP-IS800-Truss-Optimization
+- Zenodo DOI: https://doi.org/10.5281/zenodo.20508136
+
 ## Repository structure
 
 ```text
@@ -51,8 +57,8 @@ manuscript/paper1_manuscript_EWC_springer_with_titlepage.tex
 manuscript/paper1_manuscript_EWC_springer_with_titlepage.pdf
 ```
 
-Before journal submission, replace any author and repository placeholders in the manuscript with final author details and the archived DOI/URL.
+Before journal submission, replace any remaining author placeholders in the manuscript with final author details. The archived reproducibility DOI is https://doi.org/10.5281/zenodo.20508136.
 
 ## Citation
 
-If using this repository, please cite the associated manuscript and archived release DOI.
+If using this repository, please cite the associated manuscript and archived release DOI: https://doi.org/10.5281/zenodo.20508136.
