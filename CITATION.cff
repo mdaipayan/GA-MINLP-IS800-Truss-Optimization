@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: "GA-MINLP-IS800-Truss-Optimization"
-message: "If you use this software, please cite the associated Engineering with Computers manuscript and archived release DOI."
+message: "If you use this software, please cite the associated Engineering with Computers manuscript and archived Zenodo release: https://doi.org/10.5281/zenodo.20508136."
 type: software
 authors:
   - family-names: "Mandal"
@@ -10,3 +10,6 @@ abstract: "Reproducibility package for GA-warm-started mixed-integer nonlinear o
 license: MIT
 version: 1.0.0-submission
 date-released: 2026-06-02
+
+doi: "10.5281/zenodo.20508136"
+url: "https://doi.org/10.5281/zenodo.20508136"
