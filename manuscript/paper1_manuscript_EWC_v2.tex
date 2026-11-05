@@ -68,10 +68,11 @@ Metaheuristic studies of discrete truss sizing usually report the lightest
 design they found, but they rarely show how far this design is from the true
 optimum, and they often compare methods with different numbers of structural
 analyses. This paper addresses both problems for steel space trusses designed to
-IS~800:2007 with SP~6(1) equal-angle sections. First, we show that for
-linear-elastic trusses the complete discrete problem---tension capacity, the
-IS~800 column-buckling curve, slenderness and displacement limits---is exactly a
-mixed-integer linear program (MILP). A disaggregated formulation solved by
+IS~800:2007 with SP~6(1) equal-angle sections. First, following earlier exact
+formulations for trusses and for Eurocode frames, we write the complete IS~800
+problem---tension capacity, the column-buckling curve, slenderness and
+displacement limits---as an exact mixed-integer linear program (MILP), and use
+it as a yardstick for the heuristics. Solved by
 branch-and-bound certifies the global optimum of the 6-bar (101.17~kg) and the
 25-bar (580.06~kg) benchmarks, and gives a proved lower bound for the 72-bar
 benchmark. Second, we propose GA--DNS, a genetic algorithm followed by a
@@ -109,18 +110,18 @@ IS~800:2007~\citep{IS800}: tension yielding, column buckling with the
 IS~800 buckling curve, and slenderness limits. Stiffness and displacement
 limits add further constraints.
 
-Over the last two decades, many population-based metaheuristics have been
-tested on the same small set of space trusses, in particular the 25-bar and
-72-bar benchmarks~\citep{Camp2004,Camp2007,Perez2007,Degertekin2013,Shallan2014}.
-These methods are easy to apply to catalogue variables. However,
-\citet{Stolpe2016} pointed out three weaknesses that are common in this
-literature: (i) the reported designs are compared only with other heuristic
-results, so their distance from the true optimum is unknown; (ii) methods are
-often compared with different numbers of structural analyses; and (iii) for
-linear-elastic trusses, exact methods based on mixed-integer programming can
-solve many of these benchmarks to proven global
-optimality~\citep{Rasmussen2008,Stolpe2016}, which makes the use of
-metaheuristics on them hard to justify.
+Two research lines address this problem. Population-based metaheuristics
+have been tested for three decades on the same small set of space trusses, in
+particular the 25-bar and 72-bar
+benchmarks~\citep{Rajeev1992,Camp2004,Camp2007,Perez2007,Degertekin2013,Shallan2014}.
+In parallel, exact mixed-integer methods have solved discrete truss and frame
+problems to proven global
+optimality~\citep{Achtziger2007,Rasmussen2008,Kanno2010,Mela2014,VanMellaert2018}.
+The two lines rarely meet. \citet{Stolpe2016} pointed out that, as a result,
+heuristic designs are compared only with other heuristic designs, methods are
+compared with different numbers of structural analyses, and many benchmarks
+that are routinely solved by heuristics could be solved exactly.
+\Cref{sec:related} reviews both lines in more detail.
 
 The present paper takes this critique as its starting point. We study discrete
 sizing of space trusses under IS~800:2007 and ask three questions. Can the
@@ -132,13 +133,14 @@ verifiable statement about its quality, instead of only a weight?
 \subsection{Contributions}
 \label{sec:contrib}
 \begin{enumerate}
-  \item We show that, for linear-elastic trusses and a fixed catalogue, the
-        IS~800:2007 tension, buckling and slenderness checks and the
-        displacement limits lead to an exact MILP, because each capacity is a
-        constant for a given member and section. A disaggregated (convex-hull)
-        formulation without big-$M$ constants certifies the global optimum of
-        the 6-bar and 25-bar benchmarks and bounds the 72-bar optimum
-        (\cref{sec:milp,sec:res-milp}).
+  \item We extend the exact MILP approach of
+        \citet{Rasmussen2008}, \citet{Mela2014} and \citet{VanMellaert2018} to
+        IS~800:2007 and the SP~6(1) catalogue: tension, the IS~800 buckling
+        curve, slenderness (including stress reversal between load cases) and
+        displacement limits. To our knowledge this is the first certified
+        global optimum for an IS~800 truss problem. We then use the certified
+        optima, and a proved lower bound where the MILP does not finish, as the
+        reference for judging the heuristics (\cref{sec:milp,sec:res-milp}).
   \item We propose GA--DNS: a genetic algorithm for exploration followed by a
         deterministic discrete neighbourhood search (DNS). DNS stops only when
         every neighbouring design has been analysed and is either heavier or
@@ -156,10 +158,119 @@ We use ``best found'' for heuristic results and ``optimal'' only when a
 certificate exists. We also report where the proposed method is \emph{not}
 better than simpler alternatives.
 
-\Cref{sec:problem} states the problem, \cref{sec:methods} the methods,
+\Cref{sec:related} reviews related work, \cref{sec:problem} states the
+problem, \cref{sec:methods} the methods,
 \cref{sec:protocol} the comparison protocol and \cref{sec:benchmarks} the
 benchmarks. \Cref{sec:results} presents the results, \cref{sec:discussion}
 discusses them and \cref{sec:conclusion} concludes.
+
+
+%% ====================================================================== 2 RELATED WORK
+\section{Related work}
+\label{sec:related}
+
+\subsection{Metaheuristics on benchmark trusses}
+Genetic algorithms were among the first methods applied to discrete truss
+sizing with catalogue sections~\citep{Rajeev1992}. They were followed by ant
+colony optimization~\citep{Camp2004}, particle swarm
+optimization~\citep{Perez2007}, Big Bang--Big Crunch~\citep{Camp2007},
+simulated annealing~\citep{Lamberti2008}, teaching--learning-based
+optimization~\citep{Degertekin2013} and many other population-based methods;
+\citet{Saka2013} review more than a hundred such applications to steel
+structures. Most of these studies use the same small benchmarks (10-, 25-, 72-
+and 120-bar trusses) and report the lightest design found. Three common
+weaknesses have been pointed out. First, the designs are compared only with
+other heuristic designs, so the distance from the true optimum is
+unknown~\citep{Stolpe2016}. Second, the methods are often compared with
+different numbers of structural analyses and with tuned parameters, which makes
+the ranking unreliable; \citet{Hasancebi2009} compared seven metaheuristics
+within one common study on real-size pin-jointed structures, which is still
+uncommon. Third, many
+``new'' algorithms differ from older ones mainly in their metaphor, not in
+their search mechanism~\citep{Sorensen2015}. Good practice therefore requires
+equal budgets, many independent runs and proper non-parametric
+statistics~\citep{Derrac2011}, and profiles that show performance as a function
+of budget~\citep{Dolan2002,More2009}.
+
+\subsection{Exact methods for discrete truss and frame sizing}
+For linear-elastic trusses with a finite set of cross-sections, the discrete
+problem can be written as a mixed-integer program with binary section-choice
+variables and continuous displacements and forces.
+\citet{Achtziger2007} solved discrete truss topology problems to guaranteed
+global optimality by branch-and-bound and published benchmark examples with
+certified solutions. \citet{Rasmussen2008} added valid cuts and parallel
+branch-and-bound. \citet{Kanno2010} formulated robust truss topology design with
+stress constraints as an MILP. \citet{Mela2014} showed that member buckling,
+which is difficult in continuous truss optimization, becomes simple in a
+mixed-variable formulation, because the buckling resistance of each candidate
+profile is a constant. \citet{VanMellaert2016} obtained global optima for
+statically determinate trusses with displacement, member and joint constraints,
+and \citet{VanMellaert2018} extended the MILP approach to discrete sizing of
+steel frames with Eurocode member checks, comparing it with a genetic
+algorithm. \citet{Stolpe2016} concluded that many benchmark problems solved by
+metaheuristics in the literature can be solved to global optimality by such
+methods. The limits of the exact approach are problem size (the number of
+binaries grows with groups $\times$ sections) and nonlinear behaviour that does
+not fit a linear model.
+
+\subsection{Hybrid and memetic algorithms}
+Combining a population-based search with a local improvement step is the
+idea of memetic algorithms~\citep{Moscato1989}. \citet{Krasnogor2005} gave a
+design taxonomy and \citet{Neri2012} a review of the field. In structural
+optimization, GA phases are often followed by gradient, pattern or local
+discrete searches. The usual purpose is faster convergence. A by-product that
+is seldom used is that a complete local search in a finite neighbourhood ends
+with a checkable statement: no neighbouring design is both feasible and
+lighter. GA--DNS in this paper is a memetic algorithm in this sense; its new
+element is that this certificate is reported for every run and compared with
+the exact global optimum.
+
+\subsection{Beyond linear elasticity}
+Where the structural response is nonlinear, for example with global stability
+or geometric nonlinearity, exact MILP formulations are no longer directly
+available~\citep{Descamps2014,Mela2014}. This is where heuristics remain most
+useful, and it is the motivation for measuring their quality carefully on
+problems where the exact answer is known.
+
+\subsection{Research gap}
+\Cref{tab:litgap} summarises representative studies. Three gaps follow.
+\begin{enumerate}
+  \item Heuristic results on space-truss benchmarks are rarely measured against
+        a certified optimum or a proved lower bound, and rarely at equal
+        analysis budgets.
+  \item Exact MILP methods have been applied with AISC-type stress limits and
+        Eurocode checks, but not, to our knowledge, with IS~800:2007 and the
+        SP~6(1) catalogue, which are used for a large share of steel trusses in
+        India.
+  \item Heuristics return a weight but no statement about the quality of the
+        design; a local-optimality certificate is a cheap way to provide one.
+\end{enumerate}
+
+\begin{table*}[tbp]
+\centering\footnotesize
+\caption{Representative studies on discrete or catalogue-based truss and frame
+sizing. ``Proof'': global optimality is certified. ``Equal NFE'': all methods
+compared at the same number of structural analyses.}
+\label{tab:litgap}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lllccl@{}}
+\toprule
+Study & Method & Structures & Proof & Equal NFE & Constraints / code\\
+\midrule
+\citet{Rajeev1992} & GA & plane and space trusses & -- & -- & stress, displacement\\
+\citet{Camp2004} & ACO & space trusses (incl.\ 25-bar) & -- & -- & AISC sections\\
+\citet{Camp2007} & BB-BC & space trusses (incl.\ 72-bar) & -- & -- & AISC sections\\
+\citet{Hasancebi2009} & 7 metaheuristics & real-size pin-jointed & -- & common study & steel design code\\
+\citet{Degertekin2013} & TLBO & truss benchmarks & -- & -- & stress, displacement\\
+\citet{Achtziger2007} & branch-and-bound & truss topology & \checkmark & n/a & discrete areas\\
+\citet{Rasmussen2008} & cut-and-branch & truss topology & \checkmark & n/a & discrete areas\\
+\citet{Mela2014} & MILP & truss topology & \checkmark & n/a & member buckling\\
+\citet{VanMellaert2018} & MILP vs.\ GA & steel frames & \checkmark & -- & Eurocode checks\\
+This work & MILP + GA--DNS + 6 heuristics & space trusses & \checkmark$^{a}$ & \checkmark & IS~800:2007, SP~6(1)\\
+\bottomrule
+\multicolumn{6}{@{}l}{\footnotesize $^{a}$6-bar and 25-bar certified; 72-bar with proved lower bound.}
+\end{tabular}}
+\end{table*}
 
 %% ====================================================================== 2 PROBLEM
 \section{Problem formulation}
@@ -244,7 +355,10 @@ the elongation of member $i$ only for the selected section:
 \end{align}
 If $x_{gk}=0$, \cref{eq:milp-cap} forces $e_{ikl}=0$; if $x_{gk}=1$, the member
 force is $N_{il}=(EA_k/L_i)e_{ikl}$ and \cref{eq:milp-cap} is exactly the
-tension and buckling check. Slenderness is handled in the same way: if
+tension and buckling check. The same idea---one continuous force or
+elongation variable per candidate section---is used by \citet{Mela2014} and
+\citet{VanMellaert2018}; here it is applied to the IS~800 capacities.
+Slenderness is handled in the same way: if
 $\lambda_{ik}>180$ we set $C_{ik}=0$ (the member may not be in compression with
 that section), and if $\lambda_{ik}>400$ for a member of group $g$ we fix
 $x_{gk}=0$. The model is exact, and it contains no big-$M$ constants, which
@@ -626,8 +740,8 @@ as quick starting designs.
 \begin{enumerate}
 \item For linear-elastic space trusses with a fixed catalogue, the complete
       IS~800:2007 sizing problem (tension, column buckling, slenderness and
-      displacements) is an exact MILP. A big-$M$-free disaggregated formulation
-      certified the global optima of the 6-bar (101.17~kg) and 25-bar
+      displacements) can be written as an exact MILP, as earlier shown for other
+      codes. The disaggregated formulation certified the global optima of the 6-bar (101.17~kg) and 25-bar
       (580.06~kg) trusses and gave a lower bound of 535.17~kg for the 72-bar truss.
 \item GA--DNS, a GA followed by a deterministic neighbourhood search, returned a
       certified local minimum in 59 of 60 runs and reached the certified optimum in
@@ -647,6 +761,9 @@ as quick starting designs.
 %% ====================================================================== REFERENCES
 \begin{thebibliography}{99}
 
+\bibitem[Achtziger and Stolpe(2007)]{Achtziger2007}
+Achtziger W, Stolpe M (2007) Truss topology optimization with discrete design variables -- guaranteed global optimality and benchmark examples. Struct Multidisc Optim 34(1):1--20. \url{https://doi.org/10.1007/s00158-006-0074-2}
+
 \bibitem[Bureau of Indian Standards(2007)]{IS800}
 Bureau of Indian Standards (2007) IS~800:2007 General construction in steel -- Code of practice (third revision). BIS, New Delhi
 
@@ -665,11 +782,23 @@ Deb K (2000) An efficient constraint handling method for genetic algorithms. Com
 \bibitem[Degertekin and Hayalioglu(2013)]{Degertekin2013}
 Degertekin SO, Hayalioglu MS (2013) Sizing truss structures using teaching-learning-based optimization. Comput Struct 119:177--188. \url{https://doi.org/10.1016/j.compstruc.2012.12.011}
 
+\bibitem[Derrac et~al.(2011)]{Derrac2011}
+Derrac J, Garc\'ia S, Molina D, Herrera F (2011) A practical tutorial on the use of nonparametric statistical tests as a methodology for comparing evolutionary and swarm intelligence algorithms. Swarm Evol Comput 1(1):3--18. \url{https://doi.org/10.1016/j.swevo.2011.02.002}
+
+\bibitem[Descamps and Filomeno~Coelho(2014)]{Descamps2014}
+Descamps B, Filomeno Coelho R (2014) The nominal force method for truss geometry and topology optimization incorporating stability considerations. Int J Solids Struct 51(13):2390--2399. \url{https://doi.org/10.1016/j.ijsolstr.2014.03.003}
+
+\bibitem[Dolan and Mor\'e(2002)]{Dolan2002}
+Dolan ED, Mor\'e JJ (2002) Benchmarking optimization software with performance profiles. Math Program 91(2):201--213. \url{https://doi.org/10.1007/s101070100263}
+
 \bibitem[Dorigo and Gambardella(1997)]{Dorigo1997}
 Dorigo M, Gambardella LM (1997) Ant colony system: a cooperative learning approach to the traveling salesman problem. IEEE Trans Evol Comput 1(1):53--66. \url{https://doi.org/10.1109/4235.585892}
 
 \bibitem[Erol and Eksin(2006)]{Erol2006}
 Erol OK, Eksin I (2006) A new optimization method: Big Bang--Big Crunch. Adv Eng Softw 37(2):106--111. \url{https://doi.org/10.1016/j.advengsoft.2005.04.005}
+
+\bibitem[Hasan\c{c}ebi et~al.(2009)]{Hasancebi2009}
+Hasan\c{c}ebi O, \c{C}arba\c{s} S, Do\u{g}an E, Erdal F, Saka MP (2009) Performance evaluation of metaheuristic search techniques in the optimum design of real size pin jointed structures. Comput Struct 87(5--6):284--302
 
 \bibitem[Holm(1979)]{Holm1979}
 Holm S (1979) A simple sequentially rejective multiple test procedure. Scand J Stat 6(2):65--70
@@ -677,11 +806,20 @@ Holm S (1979) A simple sequentially rejective multiple test procedure. Scand J S
 \bibitem[Huangfu and Hall(2018)]{Huangfu2018}
 Huangfu Q, Hall JAJ (2018) Parallelizing the dual revised simplex method. Math Program Comput 10(1):119--142. \url{https://doi.org/10.1007/s12532-017-0130-5}
 
+\bibitem[Kanno and Guo(2010)]{Kanno2010}
+Kanno Y, Guo X (2010) A mixed integer programming for robust truss topology optimization with stress constraints. Int J Numer Methods Eng 83(13):1675--1699. \url{https://doi.org/10.1002/nme.2871}
+
 \bibitem[Kennedy and Eberhart(1995)]{Kennedy1995}
 Kennedy J, Eberhart R (1995) Particle swarm optimization. In: Proc ICNN'95, vol~4, pp 1942--1948. \url{https://doi.org/10.1109/ICNN.1995.488968}
 
 \bibitem[Kirkpatrick et~al.(1983)]{Kirkpatrick1983}
 Kirkpatrick S, Gelatt CD, Vecchi MP (1983) Optimization by simulated annealing. Science 220(4598):671--680. \url{https://doi.org/10.1126/science.220.4598.671}
+
+\bibitem[Krasnogor and Smith(2005)]{Krasnogor2005}
+Krasnogor N, Smith J (2005) A tutorial for competent memetic algorithms: model, taxonomy, and design issues. IEEE Trans Evol Comput 9(5):474--488. \url{https://doi.org/10.1109/TEVC.2005.850260}
+
+\bibitem[Lamberti(2008)]{Lamberti2008}
+Lamberti L (2008) An efficient simulated annealing algorithm for design optimization of truss structures. Comput Struct 86(19--20):1936--1953. \url{https://doi.org/10.1016/j.compstruc.2008.02.004}
 
 \bibitem[Louren\c{c}o et~al.(2003)]{Lourenco2003}
 Louren\c{c}o HR, Martin OC, St\"utzle T (2003) Iterated local search. In: Glover F, Kochenberger GA (eds) Handbook of Metaheuristics. Springer, Boston, pp 320--353. \url{https://doi.org/10.1007/0-306-48056-5_11}
@@ -689,23 +827,47 @@ Louren\c{c}o HR, Martin OC, St\"utzle T (2003) Iterated local search. In: Glover
 \bibitem[Mann and Whitney(1947)]{Mann1947}
 Mann HB, Whitney DR (1947) On a test of whether one of two random variables is stochastically larger than the other. Ann Math Stat 18(1):50--60. \url{https://doi.org/10.1214/aoms/1177730491}
 
+\bibitem[Mela(2014)]{Mela2014}
+Mela K (2014) Resolving issues with member buckling in truss topology optimization using a mixed variable approach. Struct Multidisc Optim 50(6):1037--1049. \url{https://doi.org/10.1007/s00158-014-1095-x}
+
 \bibitem[Mor\'e and Wild(2009)]{More2009}
 Mor\'e JJ, Wild SM (2009) Benchmarking derivative-free optimization algorithms. SIAM J Optim 20(1):172--191. \url{https://doi.org/10.1137/080724083}
+
+\bibitem[Moscato(1989)]{Moscato1989}
+Moscato P (1989) On evolution, search, optimization, genetic algorithms and martial arts: towards memetic algorithms. Caltech Concurrent Computation Program, Report 826, California Institute of Technology, Pasadena
+
+\bibitem[Neri and Cotta(2012)]{Neri2012}
+Neri F, Cotta C (2012) Memetic algorithms and memetic computing optimization: a literature review. Swarm Evol Comput 2:1--14. \url{https://doi.org/10.1016/j.swevo.2011.11.003}
 
 \bibitem[Perez and Behdinan(2007)]{Perez2007}
 Perez RE, Behdinan K (2007) Particle swarm approach for structural design optimization. Comput Struct 85(19--20):1579--1588. \url{https://doi.org/10.1016/j.compstruc.2006.10.013}
 
+\bibitem[Rajeev and Krishnamoorthy(1992)]{Rajeev1992}
+Rajeev S, Krishnamoorthy CS (1992) Discrete optimization of structures using genetic algorithms. J Struct Eng 118(5):1233--1250. \url{https://doi.org/10.1061/(ASCE)0733-9445(1992)118:5(1233)}
+
 \bibitem[Rasmussen and Stolpe(2008)]{Rasmussen2008}
 Rasmussen MH, Stolpe M (2008) Global optimization of discrete truss topology design problems using a parallel cut-and-branch method. Comput Struct 86(13--14):1527--1538. \url{https://doi.org/10.1016/j.compstruc.2007.05.019}
 
+\bibitem[Saka and Geem(2013)]{Saka2013}
+Saka MP, Geem ZW (2013) Mathematical and metaheuristic applications in design optimization of steel frame structures: an extensive review. Math Probl Eng 2013:271031. \url{https://doi.org/10.1155/2013/271031}
+
 \bibitem[Shallan et~al.(2014)]{Shallan2014}
 Shallan O, Eraky A, Sakr T, Hamdy O (2014) Optimization of plane and space trusses using genetic algorithms. Int J Eng Innov Technol 3(7):66--73
+
+\bibitem[S\"orensen(2015)]{Sorensen2015}
+S\"orensen K (2015) Metaheuristics -- the metaphor exposed. Int Trans Oper Res 22(1):3--18. \url{https://doi.org/10.1111/itor.12001}
 
 \bibitem[Stolpe(2016)]{Stolpe2016}
 Stolpe M (2016) Truss optimization with discrete design variables: a critical review. Struct Multidisc Optim 53(2):349--374. \url{https://doi.org/10.1007/s00158-015-1333-x}
 
 \bibitem[Storn and Price(1997)]{Storn1997}
 Storn R, Price K (1997) Differential evolution -- a simple and efficient heuristic for global optimization over continuous spaces. J Glob Optim 11:341--359. \url{https://doi.org/10.1023/A:1008202821328}
+
+\bibitem[Van~Mellaert et~al.(2016)]{VanMellaert2016}
+Van Mellaert R, Lombaert G, Schevenels M (2016) Global size optimization of statically determinate trusses considering displacement, member, and joint constraints. J Struct Eng 142(2):04015120. \url{https://doi.org/10.1061/(ASCE)ST.1943-541X.0001377}
+
+\bibitem[Van~Mellaert et~al.(2018)]{VanMellaert2018}
+Van Mellaert R, Mela K, Tiainen T, Heinisuo M, Lombaert G, Schevenels M (2018) Mixed-integer linear programming approach for global discrete sizing optimization of frame structures. Struct Multidisc Optim 57(2):579--593. \url{https://doi.org/10.1007/s00158-017-1770-9}
 
 \bibitem[Vargha and Delaney(2000)]{Vargha2000}
 Vargha A, Delaney HD (2000) A critique and improvement of the CL common language effect size statistics of McGraw and Wong. J Educ Behav Stat 25(2):101--132. \url{https://doi.org/10.3102/10769986025002101}
