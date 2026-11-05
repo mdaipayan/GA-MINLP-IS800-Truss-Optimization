@@ -1,0 +1,3 @@
+Discrete IS 800 truss sizing is posed exactly as an MILP and solved to certified optima.
+A GA plus neighbourhood search returns designs with local-optimality certificates.
+Seven heuristics are compared at equal analysis budgets against certified optima.

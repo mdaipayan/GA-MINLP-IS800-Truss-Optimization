@@ -1,0 +1,31 @@
+\begin{table}[tbp]
+\centering\small
+\caption{One-sided Mann--Whitney $U$ tests ($H_1$: GA--DNS gives lighter final designs),
+Holm-corrected within each truss, and Vargha--Delaney effect size $A_{12}$
+(probability that a GA--DNS run is lighter than a competitor run; 0.5\,=\,no difference).}
+\label{tab:tests}
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+Truss & Competitor & $p_{\mathrm{Holm}}$ & $A_{12}$ & Conclusion\\
+\midrule
+6-bar & GA & 0.005 & 0.71 & GA--DNS lighter\\
+ & DE & $<$0.001 & 1.00 & GA--DNS lighter\\
+ & PSO & $<$0.001 & 0.86 & GA--DNS lighter\\
+ & SA & 0.853 & 0.47 & n.s.; competitor better\\
+ & ACO & 0.007 & 0.68 & GA--DNS lighter\\
+ & BB-BC & $<$0.001 & 1.00 & GA--DNS lighter\\
+25-bar & GA & 1.000 & 0.50 & n.s.\\
+ & DE & 0.189 & 0.60 & n.s.\\
+ & PSO & 1.000 & 0.50 & n.s.; competitor better\\
+ & SA & 0.047 & 0.66 & GA--DNS lighter\\
+ & ACO & $<$0.001 & 0.84 & GA--DNS lighter\\
+ & BB-BC & $<$0.001 & 0.97 & GA--DNS lighter\\
+72-bar & GA & 0.273 & 0.60 & n.s.\\
+ & DE & $<$0.001 & 0.98 & GA--DNS lighter\\
+ & PSO & 0.055 & 0.70 & n.s.\\
+ & SA & 0.992 & 0.28 & n.s.; competitor better\\
+ & ACO & 0.129 & 0.66 & n.s.\\
+ & BB-BC & $<$0.001 & 1.00 & GA--DNS lighter\\
+\bottomrule
+\end{tabular}
+\end{table}

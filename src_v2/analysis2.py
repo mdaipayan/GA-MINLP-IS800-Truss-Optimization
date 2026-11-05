@@ -150,14 +150,13 @@ def fig_box(S, ref):
     for ax, (t, T) in zip(axs, S["trusses"].items()):
         Wst = best_known(S, ref, t)
         data = [np.array([r["weight"] for r in T["methods"][m]["runs"] if r["feasible"]]) / Wst for m in ORDER]
-        bp = ax.boxplot(data, vert=False, patch_artist=True, widths=0.6,
+        bp = ax.boxplot(data, orientation="horizontal", patch_artist=True, widths=0.6,
                         medianprops=dict(color="k"), flierprops=dict(ms=2))
         for b, m in zip(bp["boxes"], ORDER):
             b.set_facecolor(COL[m]); b.set_alpha(0.75)
         ax.axvline(1, color="k", ls=":", lw=1)
         ax.set_yticks(range(1, len(ORDER) + 1)); ax.set_yticklabels(ORDER if t == "6-bar" else [])
         ax.invert_yaxis(); ax.set_title(t); ax.set_xlabel("W / W*")
-        ax.set_xscale("log")
     fig.savefig(f"{FIG}/fig_boxplot_ratio.pdf"); fig.savefig(f"{FIG}/fig_boxplot_ratio.png")
 
 
