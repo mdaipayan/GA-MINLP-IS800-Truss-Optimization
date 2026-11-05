@@ -1,0 +1,30 @@
+{
+ "status": "Optimal",
+ "runtime": 0.03888961900000254,
+ "n_binary": 306,
+ "n_cont": 312,
+ "n_rows": 476,
+ "bound": 101.16625582215806,
+ "gap": 0.0,
+ "nodes": 0,
+ "warm_weight": 101.16625582215805,
+ "idx": [
+  13,
+  2,
+  2,
+  6,
+  6,
+  34
+ ],
+ "weight": 101.16625582215805,
+ "verified_feasible": true,
+ "verified_violation": 0.0,
+ "sections": [
+  "ISA 55x55x5",
+  "ISA 30x30x3",
+  "ISA 30x30x3",
+  "ISA 40x40x4",
+  "ISA 40x40x4",
+  "ISA 110x110x8"
+ ]
+}
