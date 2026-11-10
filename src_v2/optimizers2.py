@@ -212,7 +212,7 @@ def fsd(p, budget, seed=None, max_iter=50):
             for g in range(p.n_grp):
                 mem = np.where(p.groups == g)[0]
                 Fm = c["F"][mem]
-                for k in range(N_CAT):
+                for k in np.argsort(e.CAT_A, kind="stable"):   # lightest first
                     klr = p.K_eff * p.L[mem] / e.CAT_R[k]
                     ft = e.CAT_A[k] * e.FY / e.GAMMA_M0
                     fc = e.CAT_A[k] * e.fcd(klr)
@@ -260,11 +260,11 @@ def sqp_r(p, budget, seed=None):
         obj = lambda a: e.RHO * 1e-4 * a @ p.L_grp
         a0 = np.full(p.n_grp, e.CAT_A[N_CAT // 2] * 1e4)
         res = minimize(obj, a0, method="SLSQP",
-                       bounds=[(e.CAT_A[0] * 1e4, e.CAT_A[-1] * 1e4)] * p.n_grp,
+                       bounds=[(e.CAT_A.min() * 1e4, e.CAT_A.max() * 1e4)] * p.n_grp,
                        constraints={"type": "ineq", "fun": cons},
                        options=dict(maxiter=200, ftol=1e-9))
-        idx = np.array([np.searchsorted(e.CAT_A, a * 1e-4 - 1e-12) for a in res.x])
-        idx = np.clip(idx, 0, N_CAT - 1)
+        idx = np.array([int(np.argmin(np.where(e.CAT_A >= a * 1e-4 - 1e-12, e.CAT_A, np.inf)))
+                        for a in res.x])
         _repair(p, tr, idx)
         return "continuous optimum rounded up and repaired"
     return _run("SQP-R", p, budget, body, seed)
@@ -303,35 +303,44 @@ def _repair(p, tr, idx, max_steps=500):
 def dns(p, tr, idx):
     """Deterministic discrete neighbourhood search (steepest descent).
 
-    Neighbourhood N(k) = {k - e_i} U {k - e_i + e_j, i != j}.
-    Stops when no feasible neighbour is lighter. The returned design is then
-    CERTIFIED to be a local minimum with respect to N(k): every neighbour has
-    been analysed and is either heavier or infeasible.
+    A "catalogue move" of a group replaces its section by one of its grid
+    neighbours in the IS 808 table (engine2.GRID_NB): the next thinner or
+    thicker section of the same leg, or the section of the next smaller or
+    larger leg with the nearest thickness (at most 4 moves per group).
+    Neighbourhood N(k): every design obtained from k by a catalogue move in
+    ONE group or in TWO groups, and lighter than k.
+    The lighter neighbours are analysed lightest first; the first feasible one
+    is accepted. When none is feasible the search stops and the design is
+    CERTIFIED to be a local minimum with respect to N(k): every lighter
+    neighbour has been analysed and is infeasible.
     Returns (idx, certified)."""
     idx, ok = _repair(p, tr, idx)
     if not ok:
         return idx, False
     W = p.weight(idx)
     nG = p.n_grp
+    dW = lambda g, k_new: e.RHO * (e.CAT_A[k_new] - e.CAT_A[idx[g]]) * p.L_grp[g]
     while True:
         cand = []
         for i in range(nG):
-            if idx[i] == 0:
-                continue
-            t = idx.copy(); t[i] -= 1; cand.append(t)
-            for j in range(nG):
-                if j != i and idx[j] < N_CAT - 1:
-                    t2 = t.copy(); t2[j] += 1
-                    if p.weight(t2) < W - 1e-9:
-                        cand.append(t2)
-        cand.sort(key=p.weight)                    # lightest first
+            for ki in e.GRID_NB[idx[i]]:
+                di = dW(i, ki)
+                if di < -1e-9:
+                    t = idx.copy(); t[i] = ki
+                    cand.append((di, t))
+                for j in range(i + 1, nG):
+                    for kj in e.GRID_NB[idx[j]]:
+                        dij = di + dW(j, kj)
+                        if dij < -1e-9:
+                            t = idx.copy(); t[i] = ki; t[j] = kj
+                            cand.append((dij, t))
+        cand.sort(key=lambda c: c[0])              # lightest first
         moved = False
-        for t in cand:
+        for _, t in cand:
             f = tr(t)
-            if f < e.np.inf and f == p.weight(t) and p.weight(t) < W - 1e-9:
-                # feasible (fitness == weight only when feasible) and lighter
+            if f == p.weight(t):                   # fitness == weight only when feasible
                 idx, W, moved = t, p.weight(t), True
-                break                              # steepest: lightest feasible
+                break
         if not moved:
             return idx, True
 

@@ -12,8 +12,8 @@ Main changes from truss_engine.py (v1):
   * Every model is checked for kinematic stability when it is built.
     A singular or near-singular stiffness matrix raises an error instead of
     silently returning zero forces (the v1 bug).
-  * The SP 6(1) catalogue is sorted by area, so "one step up" always means
-    "the next heavier section".
+  * IS 808:2021 equal-angle catalogue with r = r_v (minimum), in the order of
+    Table 9 of the standard (leg size, then thickness).
   * Every call to evaluate() counts as one structural analysis (NFE), so all
     optimizers can be given the same analysis budget.
 
@@ -29,41 +29,52 @@ import numpy as np
 from scipy.linalg import cho_factor, cho_solve
 
 # ----------------------------------------------------------------------------
-# SP 6(1):1964 equal-angle catalogue  (label, A cm^2, r_min cm)
+# IS 808:2021 Table 9 -- Indian Standard equal leg angles (72 sections)
+# A = sectional area, r = r_v = MINIMUM radius of gyration (about the v-v axis).
+# Data file: is808_2021_equal_angles.csv (extracted from the standard; every row
+# cross-checked with r_v = sqrt(I_vv / A) and mass = 7850 A).
 # ----------------------------------------------------------------------------
-_SP6 = [
-    ("ISA 20x20x3", 1.11, 0.609), ("ISA 25x25x3", 1.42, 0.762),
-    ("ISA 25x25x4", 1.85, 0.748), ("ISA 30x30x3", 1.73, 0.922),
-    ("ISA 30x30x4", 2.27, 0.906), ("ISA 35x35x4", 2.67, 1.065),
-    ("ISA 35x35x5", 3.25, 1.048), ("ISA 40x40x4", 3.08, 1.225),
-    ("ISA 40x40x5", 3.79, 1.208), ("ISA 45x45x4", 3.49, 1.384),
-    ("ISA 45x45x5", 4.30, 1.366), ("ISA 45x45x6", 5.07, 1.349),
-    ("ISA 50x50x5", 4.80, 1.526), ("ISA 50x50x6", 5.69, 1.508),
-    ("ISA 55x55x5", 5.30, 1.686), ("ISA 55x55x6", 6.30, 1.667),
-    ("ISA 60x60x5", 5.82, 1.846), ("ISA 60x60x6", 6.91, 1.826),
-    ("ISA 60x60x8", 9.03, 1.789), ("ISA 65x65x6", 7.52, 1.987),
-    ("ISA 65x65x8", 9.86, 1.950), ("ISA 70x70x6", 8.13, 2.147),
-    ("ISA 70x70x7", 9.40, 2.129), ("ISA 75x75x6", 8.74, 2.306),
-    ("ISA 75x75x8", 11.40, 2.270), ("ISA 75x75x10", 14.00, 2.234),
-    ("ISA 80x80x6", 9.35, 2.466), ("ISA 80x80x8", 12.30, 2.428),
-    ("ISA 80x80x10", 15.20, 2.391), ("ISA 90x90x6", 10.60, 2.785),
-    ("ISA 90x90x8", 13.90, 2.747), ("ISA 90x90x10", 17.10, 2.709),
-    ("ISA 100x100x6", 11.80, 3.100), ("ISA 100x100x8", 15.60, 3.060),
-    ("ISA 100x100x10", 19.20, 3.021), ("ISA 100x100x12", 22.80, 2.983),
-    ("ISA 110x110x8", 17.20, 3.380), ("ISA 110x110x10", 21.20, 3.340),
-    ("ISA 110x110x12", 25.10, 3.300), ("ISA 120x120x8", 18.80, 3.699),
-    ("ISA 120x120x10", 23.20, 3.659), ("ISA 120x120x12", 27.50, 3.618),
-    ("ISA 130x130x10", 25.20, 3.977), ("ISA 130x130x12", 29.90, 3.937),
-    ("ISA 150x150x10", 29.20, 4.617), ("ISA 150x150x12", 34.70, 4.575),
-    ("ISA 150x150x15", 42.90, 4.512), ("ISA 200x200x16", 62.60, 6.153),
-    ("ISA 200x200x20", 77.60, 6.091), ("ISA 200x200x25", 95.70, 6.010),
-    ("ISA 200x200x32", 121.00, 5.910),
-]
-_order = sorted(range(len(_SP6)), key=lambda i: (_SP6[i][1], -_SP6[i][2]))
-CAT_LABEL = [_SP6[i][0] for i in _order]
-CAT_A = np.array([_SP6[i][1] for i in _order]) * 1e-4      # m^2
-CAT_R = np.array([_SP6[i][2] for i in _order]) * 1e-2      # m
+import csv as _csv
+import os as _os
+
+with open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                        "is808_2021_equal_angles.csv")) as _fh:
+    _ROWS = [(r["designation"], float(r["A_cm2"]), float(r["rv_mm_used"]))
+             for r in _csv.DictReader(_fh)]
+# Catalogue order = the order printed in IS 808 Table 9: by leg size, then by
+# thickness. (Sorting by area makes r_v non-monotonic in half of the steps and
+# traps neighbourhood-based searches; see docs/STAGE_E_is808_rv.md.)
+_order = list(range(len(_ROWS)))
+CAT_LABEL = ["ISA " + _ROWS[i][0] for i in _order]
+CAT_A = np.array([_ROWS[i][1] for i in _order]) * 1e-4      # m^2
+CAT_R = np.array([_ROWS[i][2] for i in _order]) * 1e-3      # m  (r_v, minimum)
 N_CAT = len(CAT_A)
+
+# Catalogue-grid neighbours of each section (used by the local search):
+#   same leg, next thinner / next thicker;
+#   next smaller / next larger leg, with the nearest thickness (ties: thinner).
+_LEG = np.array([float(_ROWS[i][0].split("x")[0]) for i in _order])
+_THK = np.array([float(_ROWS[i][0].split("x")[2]) for i in _order])
+_legs = sorted(set(_LEG))
+
+
+def _grid_neighbours(k):
+    out = []
+    same = [j for j in range(N_CAT) if _LEG[j] == _LEG[k]]
+    pos = same.index(k)
+    if pos > 0:
+        out.append(same[pos - 1])
+    if pos < len(same) - 1:
+        out.append(same[pos + 1])
+    li = _legs.index(_LEG[k])
+    for lj in (li - 1, li + 1):
+        if 0 <= lj < len(_legs):
+            other = [j for j in range(N_CAT) if _LEG[j] == _legs[lj]]
+            out.append(min(other, key=lambda j: (abs(_THK[j] - _THK[k]), _THK[j])))
+    return out
+
+
+GRID_NB = [_grid_neighbours(k) for k in range(N_CAT)]
 
 # Material and IS 800:2007 constants
 E = 200e9
@@ -106,7 +117,7 @@ class Result:
 
 
 class Problem:
-    """Discrete sizing problem: one SP 6(1) section per member group."""
+    """Discrete sizing problem: one IS 808 equal angle per member group."""
 
     def __init__(self, name, nodes, conn, bc_dof, load_cases, groups,
                  disp_limit=None, disp_dofs=None, K_eff=1.0):

@@ -1,47 +1,52 @@
 \begin{table*}[tbp]
 \centering\small
 \caption{Results over $N=20$ independent runs (seeds 0--19) with an equal budget of
-structural analyses for every method. All final designs are IS~800:2007-feasible
-(success rate 100\,\% for every method). Hit\,=\,share of runs that reach $W^\ast$
-exactly; NFE\,=\,median number of analyses needed to find the final best design.
-Bold\,=\,equal to $W^\ast$. FSD and SQP-R are deterministic (one run).}
+structural analyses for every method. Statistics are over the feasible runs.
+SR\,=\,share of runs that end with an IS~800-feasible design;
+Hit\,=\,share of runs that reach $W^\ast$ exactly; NFE\,=\,median number of analyses
+at which the final design was found. Bold\,=\,equal to $W^\ast$.
+FSD and SQP-R are deterministic (one run).
+$^\star$proposed; $^\dagger$ablation: the proposed method without the GA phase.}
 \label{tab:statistics}
 \begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-Method & Best (kg) & Median (kg) & Mean (kg) & Std (kg) & Hit (\%) & NFE & $\bar t$ (s)\\
+Method & Best (kg) & Median (kg) & Mean (kg) & Std (kg) & SR (\%) & Hit (\%) & NFE\\
 \midrule
-\multicolumn{8}{@{}l}{\textbf{6-bar} --- budget 3,000 analyses; $W^\ast=101.17$~kg (certified global optimum)}\\
-GA--DNS$^\star$ & \textbf{101.17} & \textbf{101.17} & 101.23 & 0.27 & 95 & 1,920 & 0.25 \\
-GA & \textbf{101.17} & \textbf{101.17} & 101.90 & 0.91 & 55 & 2,508 & 0.25 \\
-DE & 103.64 & 105.25 & 105.37 & 1.06 & 0 & 2,769 & 0.33 \\
-PSO & \textbf{101.17} & 102.39 & 102.29 & 0.79 & 25 & 2,714 & 0.22 \\
-SA & \textbf{101.17} & \textbf{101.17} & 101.17 & 0.00 & 100 & 2,354 & 0.33 \\
-ACO & \textbf{101.17} & \textbf{101.17} & 102.46 & 2.31 & 60 & 2,046 & 0.36 \\
-BB-BC & 102.59 & 107.95 & 108.95 & 5.11 & 0 & 1,751 & 0.23 \\
-FSD & \textbf{101.17} & --- & --- & --- & 100 & 2 & 0.00 \\
-SQP-R & 107.87 & --- & --- & --- & 0 & 84 & 0.01 \\
+\multicolumn{8}{@{}l}{\textbf{6-bar} --- budget 3,000 analyses; $W^\ast=156.82$~kg (certified global optimum)}\\
+GA--DNS$^\star$ & \textbf{156.82} & \textbf{156.82} & 156.82 & 0.00 & 100 & 100 & 1,673 \\
+DNS--ILS$^\dagger$ & \textbf{156.82} & \textbf{156.82} & 156.82 & 0.00 & 100 & 100 & 724 \\
+GA & \textbf{156.82} & 160.08 & 160.42 & 2.91 & 100 & 10 & 2,611 \\
+DE & 157.66 & 164.06 & 164.64 & 4.81 & 100 & 0 & 2,754 \\
+PSO & \textbf{156.82} & 161.34 & 160.83 & 3.70 & 100 & 20 & 2,810 \\
+SA & \textbf{156.82} & 163.92 & 167.51 & 11.34 & 100 & 5 & 2,236 \\
+ACO & \textbf{156.82} & 157.95 & 158.28 & 1.53 & 100 & 40 & 2,460 \\
+BB-BC & 170.59 & 199.59 & 193.53 & 12.23 & 100 & 0 & 1,144 \\
+FSD & \textbf{156.82} & --- & --- & --- & 100 & 100 & 2 \\
+SQP-R & 185.71 & --- & --- & --- & 100 & 0 & 90 \\
 \midrule
-\multicolumn{8}{@{}l}{\textbf{25-bar} --- budget 10,000 analyses; $W^\ast=580.06$~kg (certified global optimum)}\\
-GA--DNS$^\star$ & \textbf{580.06} & \textbf{580.06} & 583.87 & 16.36 & 90 & 5,033 & 1.01 \\
-GA & \textbf{580.06} & \textbf{580.06} & 583.91 & 16.54 & 90 & 6,392 & 1.01 \\
-DE & \textbf{580.06} & \textbf{580.06} & 589.12 & 20.82 & 70 & 6,322 & 1.33 \\
-PSO & \textbf{580.06} & \textbf{580.06} & 580.35 & 0.89 & 90 & 6,335 & 0.95 \\
-SA & \textbf{580.06} & \textbf{580.06} & 581.36 & 1.47 & 55 & 8,282 & 1.20 \\
-ACO & \textbf{580.06} & 583.87 & 587.00 & 12.61 & 20 & 3,572 & 1.58 \\
-BB-BC & 613.32 & 646.53 & 661.94 & 42.18 & 0 & 2,500 & 0.95 \\
-FSD & 584.80 & --- & --- & --- & 0 & 4 & 0.01 \\
-SQP-R & 602.77 & --- & --- & --- & 0 & 104 & 0.01 \\
+\multicolumn{8}{@{}l}{\textbf{25-bar} --- budget 10,000 analyses; $W^\ast=981.22$~kg (certified global optimum)}\\
+GA--DNS$^\star$ & \textbf{981.22} & \textbf{981.22} & 981.22 & 0.00 & 100 & 100 & 5,239 \\
+DNS--ILS$^\dagger$ & \textbf{981.22} & \textbf{981.22} & 981.22 & 0.00 & 100 & 100 & 1,854 \\
+GA & \textbf{981.22} & \textbf{981.22} & 981.75 & 1.15 & 100 & 65 & 7,876 \\
+DE & \textbf{981.22} & \textbf{981.22} & 987.92 & 24.40 & 100 & 85 & 5,490 \\
+PSO & \textbf{981.22} & \textbf{981.22} & 1136.23 & 382.77 & 100 & 75 & 8,216 \\
+SA & \textbf{981.22} & 981.69 & 982.71 & 2.50 & 100 & 45 & 8,574 \\
+ACO & \textbf{981.22} & \textbf{981.22} & 1001.32 & 49.42 & 100 & 85 & 5,260 \\
+BB-BC & 1006.24 & 1088.19 & 1099.64 & 68.49 & 100 & 0 & 1,914 \\
+FSD & \textbf{981.22} & --- & --- & --- & 100 & 100 & 2 \\
+SQP-R & 1019.55 & --- & --- & --- & 100 & 0 & 152 \\
 \midrule
-\multicolumn{8}{@{}l}{\textbf{72-bar} --- budget 20,000 analyses; $W^\ast=1032.47$~kg (best known; not certified)}\\
-GA--DNS$^\star$ & \textbf{1032.47} & 1059.45 & 1056.21 & 16.53 & 10 & 16,127 & 2.64 \\
-GA & 1033.62 & 1064.62 & 1062.27 & 17.78 & 0 & 17,401 & 2.70 \\
-DE & 1075.36 & 1103.03 & 1112.38 & 30.20 & 0 & 19,316 & 3.41 \\
-PSO & 1040.60 & 1066.13 & 1069.92 & 19.27 & 0 & 19,534 & 2.81 \\
-SA & \textbf{1032.47} & 1034.44 & 1045.69 & 23.76 & 25 & 19,522 & 3.11 \\
-ACO & 1033.62 & 1082.87 & 1098.83 & 71.08 & 0 & 8,175 & 5.06 \\
-BB-BC & 1341.92 & 1522.71 & 1531.33 & 126.56 & 0 & 3,678 & 2.62 \\
-FSD & 1803.03 & --- & --- & --- & 0 & 1 & 0.03 \\
-SQP-R & 1094.93 & --- & --- & --- & 0 & 318 & 0.06 \\
+\multicolumn{8}{@{}l}{\textbf{72-bar} --- budget 20,000 analyses; $W^\ast=1651.48$~kg (best known; not certified)}\\
+GA--DNS$^\star$ & \textbf{1651.48} & 1663.09 & 1664.52 & 5.29 & 100 & 5 & 16,260 \\
+DNS--ILS$^\dagger$ & 1655.83 & 1661.75 & 1663.90 & 3.94 & 100 & 0 & 12,583 \\
+GA & 1672.51 & 1693.40 & 1696.02 & 16.35 & 100 & 0 & 17,860 \\
+DE & 1669.05 & 1763.87 & 1799.25 & 180.69 & 100 & 0 & 19,273 \\
+PSO & 1682.44 & 3424.13 & 3166.34 & 1020.07 & 100 & 0 & 18,234 \\
+SA & 1652.00 & 1681.01 & 1689.38 & 34.56 & 100 & 0 & 18,996 \\
+ACO & 1674.06 & 1843.67 & 1975.89 & 322.36 & 100 & 0 & 14,368 \\
+BB-BC & 2292.05 & 2678.20 & 2625.68 & 223.83 & 85 & 0 & 3,456 \\
+FSD & 1746.16 & --- & --- & --- & 100 & 0 & 6 \\
+SQP-R & 1878.77 & --- & --- & --- & 100 & 0 & 469 \\
 \bottomrule
 \end{tabular}
 \end{table*}

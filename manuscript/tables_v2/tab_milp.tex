@@ -1,16 +1,18 @@
 \begin{table*}[tbp]
 \centering\footnotesize\setlength{\tabcolsep}{4pt}
-\caption{Exact MILP (\cref{sec:milp}) solved with HiGHS branch-and-bound on one CPU core.
-Upper bound\,=\,best feasible design; lower bound\,=\,proved bound on the global optimum.
-The 72-bar run was stopped at the 5400\,s time limit.}
+\caption{Exact MILP (\cref{sec:milp}) solved with HiGHS branch-and-bound.
+Lower bound\,=\,proved bound on the global optimum; best known\,=\,lightest feasible design
+found by any method; gap\,=\,(best known $-$ lower bound)/best known.
+The 72-bar run was stopped at the 5400\,s time limit. Times are wall-clock times on a
+machine shared with other jobs and are indicative only.}
 \label{tab:milp}
-\begin{tabular}{@{}lrrrrrrrl@{}}
+\begin{tabular}{@{}lrrrrrrrrl@{}}
 \toprule
-Truss & Binary & Continuous & Rows & B\&B nodes & Time (s) & Upper (kg) & Lower (kg) & Status\\
+Truss & Binary & Continuous & Rows & B\&B nodes & Time (s) & Lower bound (kg) & Best known (kg) & Gap (\%) & Status\\
 \midrule
-6-bar & 306 & 312 & 476 & 0 & 0.0 & 101.17 & 101.17 & optimal (gap 0)\\
-25-bar & 408 & 1,293 & 2,257 & 6,753 & 126.8 & 580.06 & 580.06 & optimal (gap 0)\\
-72-bar & 816 & 7,440 & 13,440 & 6,680 & 5400.1 & 1032.47 & 535.17 & time limit (gap 48.2\,\%)\\
+6-bar & 432 & 438 & 576 & 0 & 0 & 156.82 & 156.82 & 0.0 & optimal\\
+25-bar & 576 & 1,818 & 2,815 & 30,357 & 910 & 981.22 & 981.22 & 0.0 & optimal\\
+72-bar & 1,152 & 10,464 & 17,120 & 2 & 60 & 657.31 & 1651.48 & 60.2 & time limit\\
 \bottomrule
 \end{tabular}
 \end{table*}

@@ -55,7 +55,7 @@ def solve_exact(p, time_limit=1800.0, mip_rel_gap=1e-6, verbose=False,
         c[ix(g, 0):ix(g, 0) + K] = e.RHO * e.CAT_A * p.L_grp[g]
     lb = np.full(nvar, -np.inf); ub = np.full(nvar, np.inf)
     lb[:nx] = 0; ub[:nx] = 1
-    w_min = e.RHO * e.CAT_A[0] * p.L_grp
+    w_min = e.RHO * e.CAT_A.min() * p.L_grp
     W_inc = p.weight(warm_idx) if warm_idx is not None else np.inf
     for g in range(nG):
         mem = np.where(p.groups == g)[0]

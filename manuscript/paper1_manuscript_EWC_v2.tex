@@ -16,6 +16,7 @@
 \raggedbottom
 
 \begin{document}
+\input{tables_v2/numbers}
 
 %% ====================================================================== TITLE PAGE
 \begin{titlepage}
@@ -47,7 +48,7 @@
 \noindent\textbf{Ethics approval, consent to participate, consent for publication.} Not applicable.
 
 \vspace{0.45em}
-\noindent\textbf{Data availability.} All benchmark definitions, the SP~6(1) catalogue, the raw results of every run (JSON), the MILP certificates and the scripts that regenerate every table and figure are openly available at \url{https://github.com/mdaipayan/GA-MINLP-IS800-Truss-Optimization} (folders \texttt{src\_v2}, \texttt{results\_v2}, \texttt{figures\_v2}) and archived on Zenodo, \url{https://doi.org/10.5281/zenodo.20508136} [update to the DOI of the v2 release].
+\noindent\textbf{Data availability.} All benchmark definitions, the section catalogue file, the raw results of every run (JSON), the MILP certificates and the scripts that regenerate every table and figure are openly available at \url{https://github.com/mdaipayan/GA-MINLP-IS800-Truss-Optimization} (folders \texttt{src\_v2}, \texttt{results\_v2}, \texttt{figures\_v2}) and archived on Zenodo, \url{https://doi.org/10.5281/zenodo.20508136} [update to the DOI of the v2 release].
 
 \vspace{0.45em}
 \noindent\textbf{Code availability.} The Python code (analysis engine, exact MILP, all optimizers, statistics) is released under the licence stated in the repository above.
@@ -68,24 +69,25 @@ Metaheuristic studies of discrete truss sizing usually report the lightest
 design they found, but they rarely show how far this design is from the true
 optimum, and they often compare methods with different numbers of structural
 analyses. This paper addresses both problems for steel space trusses designed to
-IS~800:2007 with SP~6(1) equal-angle sections. First, following earlier exact
-formulations for trusses and for Eurocode frames, we write the complete IS~800
+IS~800:2007 with the 72 equal angles of IS~808:2021. First, following earlier
+exact formulations for trusses and for Eurocode frames, we write the complete
 problem---tension capacity, the column-buckling curve, slenderness and
-displacement limits---as an exact mixed-integer linear program (MILP), and use
-it as a yardstick for the heuristics. Solved by
-branch-and-bound certifies the global optimum of the 6-bar (101.17~kg) and the
-25-bar (580.06~kg) benchmarks, and gives a proved lower bound for the 72-bar
-benchmark. Second, we propose GA--DNS, a genetic algorithm followed by a
-deterministic discrete neighbourhood search that ends with a local-optimality
-certificate. GA--DNS and six metaheuristics (SA, GA, PSO, ACO, BB-BC, DE) are
-compared over 20 seeded runs with the same analysis budget and the same
-feasibility rule. GA--DNS reached the certified optimum in 95\,\% (6-bar) and
-90\,\% (25-bar) of runs, and its final design was certified locally optimal in
-59 of 60 runs. It was significantly better than DE and BB-BC on all trusses,
-but not better than SA or PSO on every truss. The exact solver was fastest on the
-6-bar, needed 127~s on the 25-bar, and could not close a 48\,\% gap on the
-72-bar in 90~min. These results define where exact methods are sufficient and
-where heuristics are still needed.
+displacement limits---as an exact mixed-integer linear program (MILP) and use
+it as a yardstick. Branch-and-bound certifies the global optimum of a 6-bar
+truss (156.82~kg) and of the 25-bar benchmark (981.22~kg), and gives a proved
+lower bound for the 72-bar benchmark. Second, we propose GA--DNS, a genetic
+algorithm followed by a deterministic neighbourhood search that moves on the
+leg--thickness grid of the section table and ends with a local-optimality
+certificate. GA--DNS, a variant without the GA phase, six metaheuristics (SA,
+GA, PSO, ACO, BB-BC, DE) and two deterministic methods are compared over 20
+seeded runs with the same analysis budget and the same feasibility rule.
+GA--DNS reached the certified optimum in all 40 runs on the 6- and 25-bar
+trusses, and on the 72-bar truss it gave significantly lighter designs than
+all six metaheuristics. Three results limit these claims. The variant
+without the GA phase performed equally well with fewer analyses. A simple fully
+stressed design also found both certified optima. The exact solver left a gap
+of \GAPsvt\,\% on the 72-bar truss after 90~min. These results show where
+exact methods are sufficient and where heuristics are still needed.
 
 \vspace{0.6em}
 \noindent\textbf{Keywords:} Discrete truss optimization; Mixed-integer linear programming; Global optimality; Genetic algorithm; Local search; IS~800:2007; Benchmarking
@@ -93,8 +95,8 @@ where heuristics are still needed.
 \section*{Article Highlights}
 \begin{itemize}
   \item Discrete IS~800 truss sizing is posed exactly as an MILP and solved to certified optima.
-  \item A GA plus neighbourhood search returns designs with local-optimality certificates.
-  \item Seven heuristics are compared at equal analysis budgets against certified optima.
+  \item A local search on the section-table grid returns locally certified designs.
+  \item Eight heuristics are compared at equal analysis budgets against certified optima.
 \end{itemize}
 
 %% ====================================================================== 1 INTRODUCTION
@@ -105,7 +107,7 @@ Space trusses are pin-jointed three-dimensional structures that carry load
 mainly by axial forces. They are used for long-span roofs, towers and
 industrial structures. In practice each member is chosen from a catalogue of
 rolled sections, so the minimum-weight design problem is discrete. In India the
-sections come from SP~6(1)~\citep{SP61} and the members must satisfy
+sections are those of IS~808:2021~\citep{IS808} and the members must satisfy
 IS~800:2007~\citep{IS800}: tension yielding, column buckling with the
 IS~800 buckling curve, and slenderness limits. Stiffness and displacement
 limits add further constraints.
@@ -135,22 +137,23 @@ verifiable statement about its quality, instead of only a weight?
 \begin{enumerate}
   \item We extend the exact MILP approach of
         \citet{Rasmussen2008}, \citet{Mela2014} and \citet{VanMellaert2018} to
-        IS~800:2007 and the SP~6(1) catalogue: tension, the IS~800 buckling
+        IS~800:2007 and the IS~808:2021 equal angles: tension, the IS~800 buckling
         curve, slenderness (including stress reversal between load cases) and
         displacement limits. To our knowledge this is the first certified
         global optimum for an IS~800 truss problem. We then use the certified
         optima, and a proved lower bound where the MILP does not finish, as the
         reference for judging the heuristics (\cref{sec:milp,sec:res-milp}).
   \item We propose GA--DNS: a genetic algorithm for exploration followed by a
-        deterministic discrete neighbourhood search (DNS). DNS stops only when
-        every neighbouring design has been analysed and is either heavier or
-        infeasible, so each final design carries a local-optimality certificate
-        (\cref{sec:gadns}).
+        deterministic discrete neighbourhood search (DNS) that moves on the
+        leg--thickness grid of the section table. DNS stops only when every
+        lighter neighbouring design has been analysed and is infeasible, so each
+        final design carries a local-optimality certificate (\cref{sec:gadns}).
   \item We compare GA--DNS with six metaheuristics and two deterministic
         methods under one protocol: the same analysis model, the same
         feasibility rule, the same analysis budget, 20 seeded runs, distances
         to certified optima, data profiles and corrected non-parametric
-        tests (\cref{sec:protocol,sec:results}).
+        tests. An ablation without the GA phase shows which part of the
+        hybrid does the work (\cref{sec:protocol,sec:results}).
   \item All code, raw results and certificates are openly available.
 \end{enumerate}
 
@@ -241,7 +244,7 @@ problems where the exact answer is known.
         analysis budgets.
   \item Exact MILP methods have been applied with generic stress, displacement and buckling limits and with
         Eurocode checks, but not, to our knowledge, with IS~800:2007 and the
-        SP~6(1) catalogue, which govern steel design in India.
+        IS~808 section catalogue, which govern steel design in India.
   \item Heuristics return a weight but no statement about the quality of the
         design; a local-optimality certificate is a cheap way to provide one.
 \end{enumerate}
@@ -266,7 +269,7 @@ Study & Method & Structures & Proof & Equal NFE & Constraints / code\\
 \citet{Rasmussen2008} & cut-and-branch & truss topology & \checkmark & n/a & discrete areas\\
 \citet{Mela2014} & MILP & truss topology & \checkmark & n/a & member buckling\\
 \citet{VanMellaert2018} & MILP vs.\ GA & steel frames & \checkmark & -- & Eurocode checks\\
-This work & MILP + GA--DNS + 6 heuristics & space trusses & \checkmark$^{a}$ & \checkmark & IS~800:2007, SP~6(1)\\
+This work & MILP + GA--DNS + 6 heuristics & space trusses & \checkmark$^{a}$ & \checkmark & IS~800:2007, IS~808:2021\\
 \bottomrule
 \multicolumn{6}{@{}l}{\footnotesize $^{a}$6-bar and 25-bar certified; 72-bar with proved lower bound.}
 \end{tabular}}
@@ -280,7 +283,14 @@ This work & MILP + GA--DNS + 6 heuristics & space trusses & \checkmark$^{a}$ & \
 The geometry and the connectivity are fixed. The $n_m$ members are divided
 into $n_g$ design groups; all members of group $g$ use the same section. The
 design variable of group $g$ is an integer index $k_g\in\{1,\dots,n_k\}$ into
-the SP~6(1) catalogue of $n_k=51$ equal angles, sorted by area. The weight is
+the catalogue of the $n_k=72$ equal leg angles of IS~808:2021
+(Table~9)~\citep{IS808}, from $20\times20\times3$ to $200\times200\times25$,
+kept in the order of the standard (by leg size, then by thickness). The
+catalogue gives the area $A_k$ and the minimum radius of gyration $r_k=r_v$
+(about the minor principal axis $v$--$v$). In our copy of the standard the
+$r_v$ values of the angles with legs of 100~mm and more are printed without
+the decimal point; we therefore checked every row with
+$r_v=\sqrt{I_{vv}/A}$, which agrees with the printed digits. The weight is
 \begin{equation}
   W(\mathbf{k}) = \rho \sum_{g=1}^{n_g} A_{k_g} L_g ,\qquad L_g=\sum_{i\in g} L_i ,
   \label{eq:W}
@@ -317,7 +327,7 @@ length $KL$, $K=1$. For section $k$ the design capacities are
 where $\bar\lambda=\sqrt{f_y/f_{cc}}$, $f_{cc}=\pi^2E/\lambda^2$,
 $\phi=0.5[1+\alpha(\bar\lambda-0.2)+\bar\lambda^2]$ and $\alpha=0.49$
 (IS~800 Cl.~7.1.2.1 with Table~7; buckling class~c for angles, Table~10), with $f_y=250$~MPa and
-$\gamma_{m0}=1.10$. $r_k$ is the minimum radius of gyration. A design is
+$\gamma_{m0}=1.10$. Buckling is checked about the weakest axis, with $r_k=r_v$. A design is
 feasible if, for every member $i$ and load case $l$,
 \begin{equation}
   -C_{ik_g}\le N_{il}\le T_{k_g},\qquad
@@ -362,12 +372,11 @@ Slenderness is handled in the same way: if
 $\lambda_{ik}>180$ we set $C_{ik}=0$ (the member may not be in compression with
 that section), and if $\lambda_{ik}>400$ for a member of group $g$ we fix
 $x_{gk}=0$. The model is exact, and it contains no big-$M$ constants, which
-gives a much tighter continuous relaxation than the usual big-$M$ form (in our
-tests the big-$M$ version did not find any feasible design for the 25-bar truss
-in 150~s). Given an incumbent weight $W^{\mathrm{inc}}$, sections that are too
+gives a tighter continuous relaxation than the usual big-$M$ form. Given an
+incumbent weight $W^{\mathrm{inc}}$, sections that are too
 heavy even when all other groups use the lightest section are removed.
 The MILP is solved with the branch-and-bound solver of HiGHS~\citep{Huangfu2018},
-warm-started with the best heuristic design, a relative gap tolerance of
+warm-started with the best design found by any heuristic, a relative gap tolerance of
 $10^{-6}$ and one CPU core. Every returned design is re-analysed with the
 stiffness method of \cref{eq:dsm}.
 
@@ -384,25 +393,31 @@ three best distinct designs of the last population are passed to Phase~2.
 
 \paragraph{Phase 2 (deterministic refinement with certificate).}
 Each elite is first made feasible, if necessary, by a greedy repair that moves
-the group with the largest constraint ratio one catalogue step up (for
-displacement violations, the step with the best stiffness gain per kilogram is
-chosen). The DNS then performs steepest descent in the neighbourhood
+the group with the largest constraint ratio one position up in the catalogue
+(for displacement violations, the move with the best stiffness gain per
+kilogram is chosen). The DNS then performs a descent with \emph{catalogue
+moves}. The equal angles form a grid of leg size and thickness. A catalogue
+move of a group replaces its section by one of its grid neighbours: the next
+thinner or the next thicker angle with the same leg, or the angle of the next
+smaller or the next larger leg with the nearest thickness. A group therefore
+has at most four moves. The neighbourhood is
 \begin{equation}
-  \mathcal N(\mathbf{k})=\{\mathbf{k}-\mathbf{e}_i\}\;\cup\;\{\mathbf{k}-\mathbf{e}_i+\mathbf{e}_j:\ i\neq j,\ W(\mathbf{k}-\mathbf{e}_i+\mathbf{e}_j)<W(\mathbf{k})\},
+  \mathcal N(\mathbf{k})=\{\mathbf{k}' : \mathbf{k}' \text{ differs from } \mathbf{k}
+  \text{ by a catalogue move in one or in two groups, and } W(\mathbf{k}')<W(\mathbf{k})\},
   \label{eq:nbhd}
 \end{equation}
-i.e.\ one group one step lighter, or one group lighter and another group
-heavier (a ``swap''). Because the catalogue is sorted by area, every
-$\mathbf{k}-\mathbf{e}_i$ is lighter. The lighter neighbours are analysed in
-order of increasing weight, and the first feasible one is accepted. When no
-neighbour is feasible and lighter, DNS stops. At that point every design in
-$\mathcal N(\mathbf{k})$ has been analysed, so the final design is
-\emph{certified} to be a local minimum with respect to $\mathcal N$. The
-certificate is a finite, checkable statement; it is not a proof of global
-optimality. With the remaining budget, an iterated local search
-\citep{Lourenco2003} changes two random groups of the best certified design by
-up to three catalogue steps and runs DNS again; a new design is kept only if it
-is certified and lighter.
+which contains at most $4n_g+8n_g(n_g-1)$ designs. The two-group moves
+include ``swaps'', in which one group becomes lighter and another heavier. The
+neighbours are analysed in order of increasing weight, and the first feasible
+one is accepted. When no neighbour is feasible, DNS stops. At that point every
+design in $\mathcal N(\mathbf{k})$ has been analysed and is infeasible, so the
+final design is \emph{certified} to be a local minimum with respect to
+$\mathcal N$. The certificate is a finite, checkable statement; it is not a
+proof of global optimality. The neighbourhood is defined on the section table
+itself and does not depend on how the catalogue is indexed. With the remaining
+budget, an iterated local search \citep{Lourenco2003} changes two random
+groups of the best certified design by up to three catalogue positions and
+runs DNS again; a new design is kept only if it is certified and lighter.
 
 \begin{algorithm}[tbp]
 \caption{GA--DNS}
@@ -416,7 +431,7 @@ is certified and lighter.
 \EndFor
 \State $\mathbf{k}^\star\leftarrow$ lightest certified design
 \While{analyses $<B$}\Comment{iterated local search}
-  \State $\mathbf{k}'\leftarrow\mathbf{k}^\star$ with two random groups changed by $\le3$ steps
+  \State $\mathbf{k}'\leftarrow\mathbf{k}^\star$ with two random groups changed by $\le3$ positions
   \State $\mathbf{k}'\leftarrow\textsc{Repair}(\mathbf{k}')$;\quad $\mathbf{k}'\leftarrow\textsc{DNS}(\mathbf{k}')$
   \State \textbf{if} $\mathbf{k}'$ is certified and $W(\mathbf{k}')<W(\mathbf{k}^\star)$ \textbf{then} $\mathbf{k}^\star\leftarrow\mathbf{k}'$
 \EndWhile
@@ -424,7 +439,7 @@ is certified and lighter.
 \Statex
 \Function{DNS}{$\mathbf{k}$}
   \Repeat
-    \State analyse the members of $\mathcal N(\mathbf{k})$ that are lighter than $\mathbf{k}$, lightest first
+    \State analyse the designs in $\mathcal N(\mathbf{k})$, lightest first
     \State move to the first feasible one; if none exists, \Return $\mathbf{k}$ (certified)
   \Until{budget exhausted}
 \EndFunction
@@ -439,11 +454,17 @@ budget, particle swarm optimization (PSO)~\citep{Kennedy1995,Perez2007}, ant
 colony optimization (ACO)~\citep{Dorigo1997,Camp2004}, Big Bang--Big Crunch
 (BB-BC)~\citep{Erol2006,Camp2007} and differential evolution
 (DE)~\citep{Storn1997}. Continuous positions (PSO, BB-BC, DE) are rounded to
-the nearest index before analysis. Two deterministic methods are included:
-fully stressed design with catalogue selection (FSD), which cannot control
+the nearest index before analysis. All of them use the catalogue in the order
+of the standard, in which the radius of gyration changes smoothly from one
+position to the next. To see which part of the hybrid does the work, we also
+run DNS--ILS, an ablation of GA--DNS in which Phase~1 is reduced to the random
+initial population (40 analyses), so that almost the whole budget goes to DNS
+and the iterated local search. Two deterministic methods are included:
+fully stressed design (FSD), which gives every group the lightest angle that
+passes the member checks for the current forces and cannot control
 displacements, and SQP-R, a continuous SLSQP solution~\citep{Virtanen2020} with
-radius of gyration from a fitted law $r=c\,A^{b}$, followed by rounding up and
-the repair step of GA--DNS. \Cref{tab:params} lists all settings. The
+radius of gyration from a fitted law $r=c\,A^{b}$, followed by rounding up to
+the lightest angle with at least that area and the repair step of GA--DNS. \Cref{tab:params} lists all settings. The
 parameters are common textbook values and were not tuned for any benchmark.
 
 \begin{table}[tbp]
@@ -460,7 +481,8 @@ PSO & 30 particles; inertia $0.9\to0.4$; $c_1=c_2=2$; $|v|\le10$\\
 ACO & 20 ants; $\alpha=1$, $\beta=0.5$ ($\eta=1/A_k$); evaporation 0.2; rank-based (3) + elitist update\\
 BB-BC & 30 candidates; centre $=0.5\,$(centre of mass)$+0.5\,$(best); spread $\propto1/t$\\
 DE & DE/rand/1/bin; population 30; $F=0.6$; $CR=0.9$\\
-GA--DNS & GA as above for $0.5B$; 4 elites; DNS neighbourhood \cref{eq:nbhd}; ILS kick 2 groups, $\le3$ steps\\
+GA--DNS & GA as above for $0.5B$; 4 elites; DNS neighbourhood \cref{eq:nbhd}; ILS kick 2 groups, $\le3$ positions\\
+DNS--ILS & as GA--DNS, but Phase~1 is only the random initial population (40 analyses)\\
 FSD & start at mid-catalogue; at most 50 resizing cycles\\
 SQP-R & SLSQP, 200 iterations, $\text{ftol}=10^{-9}$; round up; repair\\
 MILP & HiGHS 1.15, gap $10^{-6}$, 1 thread, time limit 5400~s, warm start\\
@@ -482,15 +504,17 @@ feasibility rule of \citet{Deb2000}, written as one scalar: $f=W$ for feasible
 designs and $f=W_{\max}+10^3 v$ otherwise, where $W_{\max}$ is the weight of
 the heaviest catalogue design and $v$ is the sum of constraint violations
 (normalised ratios minus one). A feasible design is therefore always better than
-an infeasible one, and no penalty factor needs tuning. All reported designs
+an infeasible one, and no penalty factor needs tuning. A run that ends without
+a feasible design is counted as a failure. All reported designs
 are re-checked by an independent code path (\cref{sec:res-designs}).
 
 \paragraph{Runs and statistics.} Each stochastic method is run with seeds
-0--19. We report best, median, mean, standard deviation, the share of runs
+0--19. We report best, median, mean, standard deviation, the share of
+feasible runs, the share of runs
 that reach the certified (or best-known) weight $W^\ast$, and the median number
 of analyses used to find the final design. Because the runs of different
 methods are independent, GA--DNS is compared with each competitor by the
-one-sided Mann--Whitney $U$ test~\citep{Mann1947} with Holm
+two-sided Mann--Whitney $U$ test~\citep{Mann1947} with Holm
 correction~\citep{Holm1979}, and the effect size is the Vargha--Delaney
 $A_{12}$~\citep{Vargha2000}. Convergence is plotted against analyses, not
 against time or iterations, and data profiles~\citep{More2009} show the
@@ -498,7 +522,7 @@ share of all runs that reach $W^\ast$ (or $1.01W^\ast$) as a function of the
 budget used.
 
 \paragraph{Software.} Python 3.13, NumPy, SciPy~\citep{Virtanen2020} and
-HiGHS~\citep{Huangfu2018}, on a 2-core Linux machine.
+HiGHS~\citep{Huangfu2018}, on a 2-core Linux virtual machine. Effort is reported in structural analyses; wall-clock times are given only for the MILP.
 
 %% ====================================================================== 5 BENCHMARKS
 \section{Benchmark trusses}
@@ -525,7 +549,7 @@ are limited to $\pm0.25$~in (6.35~mm).
 
 The benchmark geometries and loads are taken from the earlier literature
 (imperial units, US sections and allowable-stress limits), but the section
-catalogue and the member checks here are those of IS~800 and SP~6(1).
+catalogue and the member checks here are those of IS~808 and IS~800.
 Therefore the weights in this paper must not be compared directly with the
 published results.
 
@@ -558,67 +582,78 @@ Truss & Nodes & Members & Groups & Load cases & Budget $B$ & Displacement limit\
 \subsection{Certified optima}
 \label{sec:res-milp}
 \Cref{tab:milp} gives the exact MILP results. For the 6-bar truss the MILP
-proves in 0.02~s that 101.17~kg is the global optimum. For the 25-bar truss it
-proves that 580.06~kg is the global optimum after 6753 branch-and-bound nodes
-and 127~s. For the 72-bar truss the solver reached the 90-minute limit with the
-warm-start design of 1032.47~kg as the upper bound and a proved lower bound of
-535.17~kg. The 72-bar optimum is therefore only known to lie in
-$[535.17,\,1032.47]$~kg; we call 1032.47~kg the best-known value. This shows
-the practical limit of the exact approach on a laptop-class machine:
-16 groups $\times$ 51 sections and two load cases are already difficult.
+proves at the root node that 156.82~kg is the global optimum. For the 25-bar
+truss it proves that 981.22~kg is the global optimum after \NODEStf{}
+branch-and-bound nodes and about \TIMEtf~min. For the 72-bar truss
+(\BINsvt{} binary variables) the solver reached the 90-minute limit with a
+proved lower bound of \LBsvt~kg, while the lightest feasible design found by any
+method weighs 1651.48~kg. The 72-bar optimum is therefore only known to lie in
+$[\LBsvt,\,1651.48]$~kg, a gap of \GAPsvt\,\%; we call 1651.48~kg the
+best-known value. This shows the practical limit of the exact approach with an
+open-source solver on a small machine: 16 groups $\times$ 72 sections and two
+load cases are already too difficult.
 
 \input{tables_v2/tab_milp}
 
 \subsection{Statistical comparison}
 \label{sec:res-stats}
-\Cref{tab:statistics} lists the results of all methods. Every method produced
-a feasible design in every run, because of the common feasibility rule.
+\Cref{tab:statistics} lists the results of all methods.
 \begin{itemize}
-\item \textbf{6-bar.} GA--DNS reached the global optimum in 19 of 20 runs and
-      SA in all 20 runs. FSD also finds the optimum, using only two analyses,
-      because this truss is statically determinate and has no displacement
-      limit. DE and BB-BC never reached the optimum.
-\item \textbf{25-bar.} GA--DNS, GA and PSO reached the certified optimum in
-      90\,\% of the runs; PSO had the lowest mean (580.35~kg). The two GA--DNS
-      runs that missed the optimum stopped in other certified local minima
-      (582.94~kg and 653.33~kg).
-\item \textbf{72-bar.} SA and GA--DNS found the best-known design
-      (1032.47~kg), in 25\,\% and 10\,\% of the runs respectively. GA--DNS had a
-      smaller spread (std 16.5~kg vs 23.8~kg) and a better worst case, but SA
-      had the better median (1034.44~kg vs 1059.45~kg).
+\item \textbf{6-bar.} GA--DNS and DNS--ILS reached the global optimum in all
+      20 runs. The six metaheuristics reached it in at most 40\,\% of their
+      runs (ACO), and DE and BB-BC never did. FSD also finds the optimum, with
+      only two analyses, because this truss is statically determinate and has
+      no displacement limit.
+\item \textbf{25-bar.} GA--DNS and DNS--ILS again reached the certified
+      optimum in all 20 runs. ACO and DE reached it in 85\,\%, PSO in 75\,\%,
+      GA in 65\,\% and SA in 45\,\% of the runs; PSO had some very poor runs
+      (worst 2188~kg). FSD also returns the certified optimum after two
+      analyses: the displacement limit is not active, and every group is
+      governed by its own strength or slenderness check.
+\item \textbf{72-bar.} The best-known design (1651.48~kg) was found by one
+      GA--DNS run; the best SA run reached 1652.00~kg and the best DNS--ILS run
+      1655.83~kg. The medians separate the methods more clearly: 1663.09~kg
+      (GA--DNS) and 1661.75~kg (DNS--ILS) against 1681.01~kg (SA), 1693.40~kg
+      (GA) and more than 1760~kg for DE, ACO, PSO and BB-BC. Sixteen GA--DNS
+      runs and 14 DNS--ILS runs ended within 1\,\% of the best-known weight,
+      against five SA runs and none of the other methods. BB-BC ended
+      without a feasible design in three runs. FSD is 5.7\,\% heavier than the
+      best-known design, so on this truss the redistribution of forces matters.
 \end{itemize}
 
 \input{tables_v2/tab_statistics}
 
-\Cref{tab:tests} confirms these observations. After Holm correction, GA--DNS
-gives significantly lighter designs than DE and BB-BC on all trusses, than ACO
-on the 6- and 25-bar trusses, than GA and PSO on the 6-bar truss, and than SA on
-the 25-bar truss. It is not significantly better than GA or PSO on the larger
-trusses, nor than SA on the 6- and 72-bar trusses; on the 72-bar truss the effect
-size even favours SA ($A_{12}=0.28$).
+\Cref{tab:tests} gives the two-sided tests. GA--DNS is significantly lighter
+than all six metaheuristics on the 6-bar and the 72-bar truss
+($A_{12}\ge0.80$ and $A_{12}\ge0.88$). On the 25-bar truss, where most methods
+often reach the optimum, the difference is significant against GA, SA and
+BB-BC but not against DE, PSO and ACO. In no case is a competitor
+significantly lighter than GA--DNS. GA--DNS and DNS--ILS do not differ
+significantly on any truss.
 
 \input{tables_v2/tab_tests}
 
 \subsection{Convergence and data profiles}
 \label{sec:res-conv}
 \Cref{fig:conv} shows the median best-feasible weight against the number of
-analyses. ACO falls fastest at the start but then stagnates. On the 6- and
-25-bar trusses, GA--DNS reaches $W^\ast$ earlier than the other methods; the
-step at $0.5B$ marks the start of DNS. On the 72-bar truss SA is slow at first
-(high temperature) but reaches the lowest median at the end of the budget.
-The data profiles in \cref{fig:profile} combine all 60 runs per method. For
-the exact target $W^\ast$, GA--DNS solves the largest share of runs for every
-budget fraction above about 0.55, ending at 65\,\% of all runs (SA 60\,\%, GA
-48\,\%). For the 1\,\% target, GA--DNS leads between about 0.55 and 0.8 of the
-budget, but at the full budget SA solves the most runs (93\,\% against 72\,\%
-for GA--DNS), mainly because of its strong 72-bar results. The distributions of $W/W^\ast$ are shown
-in \cref{fig:box}.
+analyses. The step of GA--DNS at $0.5B$ marks the start of DNS. DNS--ILS, which
+starts its local search after 40 analyses, converges much earlier: its median
+run reaches $W^\ast$ after 724 analyses on the 6-bar truss and 1854 on the
+25-bar truss, against 1673 and 5239 for GA--DNS and 5679 for the fastest
+metaheuristic on the 25-bar truss (DE).
+The data profiles in \cref{fig:profile} combine all 60 runs per method. With
+the full budget, GA--DNS and DNS--ILS reach the exact target $W^\ast$ in
+68\,\% and 67\,\% of all runs; the best metaheuristic is ACO with 42\,\%. For
+the 1\,\% target the shares are 93\,\% and 90\,\%, against 48\,\% or less for
+the metaheuristics. After a quarter of the budget, DNS--ILS has already
+reached the 1\,\% target in 60\,\% of all runs, and no other method in more
+than 5\,\%. The distributions of $W/W^\ast$ are shown in \cref{fig:box}.
 
 \begin{figure*}[tbp]
 \centering
 \includegraphics[width=\textwidth]{fig_convergence_nfe}
 \caption{Median best-feasible weight of 20 runs against the number of
-structural analyses (shaded: interquartile range of GA--DNS and GA). Dotted
+structural analyses (shaded: interquartile range of GA--DNS and SA). Dotted
 line: certified optimum (6-, 25-bar) or best-known weight (72-bar).}
 \label{fig:conv}
 \end{figure*}
@@ -635,39 +670,43 @@ of the fraction of the analysis budget used.}
 \begin{figure*}[tbp]
 \centering
 \includegraphics[width=\textwidth]{fig_boxplot_ratio}
-\caption{Distribution of final weight ratio $W/W^\ast$ over 20 runs (1.0 = certified or best-known optimum).}
+\caption{Distribution of the final weight ratio $W/W^\ast$ over the feasible
+runs (1.0 = certified or best-known optimum; values above 1.5 are drawn at 1.5).}
 \label{fig:box}
 \end{figure*}
 
-\subsection{Effect of Phase 2 and the certificates}
+\subsection{Effect of the two phases and the certificates}
 \label{sec:res-phase2}
-Compared with the best design at the end of Phase~1, the DNS and ILS steps
-reduced the final weight by a median of 2.8\,\% (6-bar), 0.2\,\% (25-bar) and
-2.4\,\% (72-bar), with a maximum of 9.8\,\%, 6.6\,\% and 6.7\,\%. The final
-design of GA--DNS was certified as a local minimum with respect to
-\cref{eq:nbhd} in 20/20, 20/20 and 19/20 runs; in the remaining 72-bar run the
-best design was found at analysis 19\,945 of 20\,000, and the budget ended
-before DNS could complete its check. On the 6- and 25-bar trusses, every run that did not reach $W^\ast$
-still returned a certified local minimum. This tells the user that the design
-cannot be improved by any single-step or swap change, and that a different
-starting point (or the MILP) is needed to improve it.
+Compared with the best design at the end of Phase~1, Phase~2 reduced the
+final weight of GA--DNS by a median of 7.0\,\% (6-bar), 0.3\,\% (25-bar) and
+7.8\,\% (72-bar), with a maximum of 21.6\,\%, 1.5\,\% and 13.8\,\%. The
+ablation shows the opposite for Phase~1: without the GA, DNS--ILS reaches the
+same final quality (\cref{tab:tests}) with fewer analyses. On these
+benchmarks the local search on the section grid does the work, and the GA
+phase is not needed.
+
+The final design was certified as a local minimum with respect to
+\cref{eq:nbhd} in 20, 20 and 16 of the 20 GA--DNS runs, and in 20, 20 and 15
+of the DNS--ILS runs. In the remaining 72-bar runs the budget ended while the
+last check was still running; this includes the run that found the best-known
+design, which a separate check afterwards confirmed to be a local minimum. The
+certificate needed 57, 100 and 396 analyses for the best designs of the three
+trusses. On the 72-bar truss the certified local minima of different runs
+differ by about 1\,\% in weight, so a local certificate does not replace a
+global bound there.
 
 \subsection{Designs and independent verification}
 \label{sec:res-designs}
 \Cref{tab:design6bar,tab:design25bar,tab:design72bar} give the best designs.
 Each was re-analysed by a separate implementation (element-by-element
-assembly, dense solver, IS~800 formulas coded again). The weights agree to
-$10^{-6}$~kg, the equilibrium error is below $10^{-14}$ relative to the load,
-and all constraints are satisfied: the largest DCR is 0.935, 0.998 and 0.881,
-and the largest displacement ratio is 0.524 (25-bar) and 0.353 (72-bar). In the
-25-bar design the strength of group~3 (DCR 0.998) and the slenderness of
-group~5 ($\lambda$-ratio 0.994) are active, while the displacement limit is not.
-In the 72-bar design group~7 is exactly at the tension slenderness limit of
-400, and several compression groups are close to 180 ($\lambda$-ratio 0.92--0.97).
-Thus, with IS~800 slenderness limits and small SP~6(1) angles, slenderness
-rather than displacement governs these benchmarks under IS~800; in the
-original versions of the problems the displacement limits are usually reported
-as active.
+assembly, dense solver, IS~800 formulas coded again). The weights agree, the
+equilibrium error is below $10^{-14}$ relative to the load, and all
+constraints are satisfied: the largest DCR is 0.994, 0.982 and 0.982, the
+largest slenderness ratio is 0.943, 0.991 and 0.980 of its limit, and the
+largest displacement ratio is 0.353 (25-bar) and 0.217 (72-bar). Thus, with
+the IS~800 slenderness limits and the minimum radius of gyration of single
+angles, strength and slenderness govern these designs, and the displacement
+limits are far from active.
 
 \input{tables_v2/tab_design6bar}
 \input{tables_v2/tab_design25bar}
@@ -678,63 +717,71 @@ as active.
 \label{sec:discussion}
 
 \subsection{When is a heuristic justified?}
-For linear-elastic trusses the IS~800 problem is an exact MILP. On the
-6-bar truss the MILP is the best method by any measure. On the 25-bar truss the
-MILP needs about 127~s, while GA--DNS finds the same design in about 1~s in
-90\,\% of the runs; however, only the MILP proves that it is optimal. On the
+For linear-elastic trusses the IS~800 problem is an exact MILP. On the 6-bar
+truss the MILP is solved at once. On the 25-bar truss it needs minutes, while
+the local search finds the same design within a few thousand analyses (about a
+second); however, only the MILP proves that this design is optimal. On the
 72-bar truss the MILP could not close the gap in 90 minutes, so heuristics are
-still useful there, and better MILP techniques (valid cuts, symmetry breaking,
-parallel branch-and-bound~\citep{Rasmussen2008}) are an obvious next step.
-Our answer to the critique of \citet{Stolpe2016} is therefore: heuristic
-results on these benchmarks should be measured against exact bounds, and a
-heuristic is justified mainly where the exact model stops being an MILP---for
-example with geometric nonlinearity, imperfection-sensitive buckling or
-nonlinear code interaction checks---or where it becomes too large.
+still needed there, and better MILP techniques (valid cuts, symmetry breaking,
+parallel branch-and-bound~\citep{Rasmussen2008}) or a commercial solver are an
+obvious next step. Our answer to the critique of \citet{Stolpe2016} is
+therefore: heuristic results on these benchmarks should be measured against
+exact bounds, and a heuristic is justified mainly where the exact model stops
+being an MILP---for example with geometric nonlinearity,
+imperfection-sensitive buckling or nonlinear code interaction checks---or
+where it becomes too large.
+
+\subsection{Simple methods first}
+Two simple methods did surprisingly well. FSD, which needs a handful of
+analyses, returned the certified optimum of the 6- and 25-bar trusses, because
+no displacement limit is active and each group is governed by its own member
+check. It was 5.7\,\% too heavy only on the 72-bar truss. DNS--ILS, a plain
+iterated local search without any population, matched GA--DNS everywhere.
+Population-based metaheuristics were less reliable than both on all three
+trusses. This agrees with the warning of \citet{Sorensen2015} and with the
+observation of \citet{Hasancebi2009} that simple GAs converge slowly. We
+therefore recommend that studies of this kind always include FSD and a plain
+local search as baselines. SQP-R was 18.4\,\%, 3.9\,\% and 13.8\,\% heavier
+than $W^\ast$; the rounding step and the approximate $r(A)$ law cost weight.
+
+\subsection{Why the neighbourhood matters}
+For single angles the minimum radius of gyration depends almost only on the
+leg size ($r_v\approx0.2$ times the leg), while the area depends on leg and
+thickness. Slenderness, which governs many members here, is therefore
+controlled by the leg, and strength by leg and thickness together. A
+neighbourhood that moves separately in leg and in thickness follows this
+structure. It is also the reason why all index-based methods use the catalogue
+in the order of the standard and not sorted by area: in area order, adjacent
+positions often belong to different legs, and the slenderness of a member
+jumps up and down from one position to the next.
 
 \subsection{What the certificate adds}
 A weight alone does not tell the engineer whether the design can still be
 improved. The DNS certificate is weaker than global optimality, but it is
-cheap (at most $n_g^2$ analyses per check), it can be verified by anyone, and it
-is independent of the random seed. Combined with the MILP lower bound, the user
-also gets a bound on the remaining gap. For the 72-bar truss, for example, the
-best GA--DNS design is certified locally optimal and lies at most
-$(1032.47-535.17)/1032.47=48\,\%$ above the global optimum. This bound is
-loose; it shows the value of a better lower bound rather than the quality of the
-design.
-
-\subsection{GA--DNS compared with the other heuristics}
-GA--DNS solved the largest share of runs to the exact target
-(\cref{fig:profile}), and it reached $W^\ast$ with the fewest analyses on the
-6- and 25-bar trusses (median 1933 and 5033 analyses, against 2354 and 6466 for
-the next best method). It was not uniformly the best: at the 1\,\% target and
-the full budget SA was more reliable, mainly on the 72-bar truss.
-Well-tuned SA and PSO are strong on these small discrete problems, which agrees
-with the strong performance of SA reported by \citet{Hasancebi2009}, and the
-present paper does not claim otherwise. The main weakness of GA--DNS is that
-Phase~2 cannot leave a poor basin chosen by Phase~1 (the two 653~kg runs on the
-25-bar truss); larger ILS kicks or several independent GA restarts may help.
-
-\subsection{Deterministic baselines}
-FSD needs very few analyses and is optimal for the statically determinate
-6-bar truss, but it is 0.8\,\% heavier on the 25-bar and 75\,\% heavier on the
-72-bar truss, because it ignores stiffness redistribution. Continuous SQP with
-rounding (SQP-R) is 6.6\,\%, 3.9\,\% and 6.0\,\% heavier than $W^\ast$; the
-rounding step and the approximate $r(A)$ law cost weight. Both are useful only
-as quick starting designs.
+cheap (57 to 396 analyses here, and never more than $4n_g+8n_g(n_g-1)$), it can
+be verified by anyone, and it is independent of the random seed. Combined with
+the MILP lower bound, the user also gets a bound on the remaining gap: the
+best 72-bar design is certified locally optimal and lies at most
+\GAPsvt\,\% above the global optimum. This bound is loose; it shows the value
+of a better lower bound rather than the quality of the design.
 
 \subsection{Limitations}
 \begin{itemize}
-\item The analysis is linear-elastic with ideal pin joints. Single angles
-      connected by one leg should be checked with the equivalent slenderness of
-      IS~800 Cl.~7.5, and net-section rupture and block shear (Cl.~6.3--6.4) are
-      not checked. These checks would change the capacities but not the MILP
-      structure, as long as each capacity is a constant for a member--section pair.
-\item The loads come from the imperial benchmarks of the earlier literature and are not IS~875 load
-      combinations.
-\item The method parameters were not tuned. Other settings could change the
-      ranking of the heuristics, but they would not change the certified optima.
-\item Only one machine and one MILP solver were used; commercial solvers may
-      close the 72-bar gap faster.
+\item Only three small trusses were studied, and the 6-bar truss is trivial.
+      Larger benchmarks are needed to see how the methods scale.
+\item The analysis is linear-elastic with ideal pin joints and concentric
+      forces. Single angles connected through one leg should be checked with
+      the equivalent slenderness of IS~800 Cl.~7.5, and net-section rupture and
+      block shear (Cl.~6.3--6.4) are not checked. These checks would change the
+      capacities but not the MILP structure, as long as each capacity is a
+      constant for a member--section pair.
+\item The loads come from the imperial benchmarks of the earlier literature.
+      They are not IS~875 load combinations, and the same loads are used for the
+      strength checks and for the displacement limits.
+\item The method parameters were not tuned and no sensitivity study was made.
+      Other settings could change the ranking of the metaheuristics, but they
+      would not change the certified optima.
+\item Only one machine and one open-source MILP solver were used.
 \end{itemize}
 
 %% ====================================================================== 8 CONCLUSIONS
@@ -744,19 +791,26 @@ as quick starting designs.
 \item For linear-elastic space trusses with a fixed catalogue, the complete
       IS~800:2007 sizing problem (tension, column buckling, slenderness and
       displacements) can be written as an exact MILP, as earlier shown for other
-      codes. The disaggregated formulation certified the global optima of the 6-bar (101.17~kg) and 25-bar
-      (580.06~kg) trusses and gave a lower bound of 535.17~kg for the 72-bar truss.
-\item GA--DNS, a GA followed by a deterministic neighbourhood search, returned a
-      certified local minimum in 59 of 60 runs and reached the certified optimum in
-      95\,\% (6-bar) and 90\,\% (25-bar) of the runs at equal analysis budgets.
-\item GA--DNS was significantly better than DE and BB-BC on all trusses and than
-      ACO on two trusses, but it was not better than SA or PSO on every truss; SA
-      had the best median on the 72-bar truss.
-\item With IS~800 slenderness limits and SP~6(1) angles, slenderness and strength,
-      not displacement, govern the optimal designs of these benchmarks.
-\item Future work will use the same certified protocol for geometrically nonlinear
-      and imperfection-sensitive space trusses, where an exact MILP is no longer
-      available and heuristics with certificates are most needed.
+      codes. With the 72 equal angles of IS~808:2021 it certified the global
+      optima of the 6-bar (156.82~kg) and 25-bar (981.22~kg) trusses and gave a
+      lower bound of \LBsvt~kg for the 72-bar truss (best known 1651.48~kg).
+\item A deterministic neighbourhood search on the leg--thickness grid of the
+      section table, restarted by an iterated local search, reached both
+      certified optima in every run and gave significantly lighter 72-bar
+      designs than SA, GA, PSO, ACO, BB-BC and DE at equal analysis budgets.
+      The final design of GA--DNS carried a local-optimality certificate in 56 of 60 runs.
+\item The GA phase of GA--DNS was not needed: the variant without it gave the
+      same final weights with fewer analyses.
+\item Fully stressed design found both certified optima with a handful of
+      analyses and was 5.7\,\% too heavy on the 72-bar truss. Simple baselines
+      of this kind should be reported together with metaheuristics.
+\item With the IS~800 slenderness limits and the minimum radius of gyration of
+      single angles, strength and slenderness, not displacement, govern the
+      optimal designs of these benchmarks.
+\item Future work will use the same certified protocol for larger trusses and
+      for geometrically nonlinear and imperfection-sensitive space trusses,
+      where an exact MILP is no longer available and heuristics with
+      certificates are most needed.
 \end{enumerate}
 
 \backmatter
@@ -770,8 +824,8 @@ Achtziger W, Stolpe M (2007) Truss topology optimization with discrete design va
 \bibitem[Bureau of Indian Standards(2007)]{IS800}
 Bureau of Indian Standards (2007) IS~800:2007 General construction in steel -- Code of practice (third revision). BIS, New Delhi
 
-\bibitem[Bureau of Indian Standards(1964)]{SP61}
-Bureau of Indian Standards (1964) SP~6(1):1964 ISI handbook for structural engineers, Part~1: Structural steel sections. BIS, New Delhi
+\bibitem[Bureau of Indian Standards(2021)]{IS808}
+Bureau of Indian Standards (2021) IS~808:2021 Hot rolled steel beam, column, channel and angle sections -- Dimensions and properties (fourth revision). BIS, New Delhi
 
 \bibitem[Camp and Bichon(2004)]{Camp2004}
 Camp CV, Bichon BJ (2004) Design of space trusses using ant colony optimization. J Struct Eng 130(5):741--751. \url{https://doi.org/10.1061/(ASCE)0733-9445(2004)130:5(741)}

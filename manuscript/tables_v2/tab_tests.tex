@@ -1,30 +1,36 @@
 \begin{table}[tbp]
 \centering\small
-\caption{One-sided Mann--Whitney $U$ tests ($H_1$: GA--DNS gives lighter final designs),
-Holm-corrected within each truss, and Vargha--Delaney effect size $A_{12}$
-(probability that a GA--DNS run is lighter than a competitor run; 0.5\,=\,no difference).}
+\caption{Two-sided Mann--Whitney $U$ tests of the final weights of GA--DNS against
+each other method, Holm-corrected within each truss, and Vargha--Delaney effect size
+$A_{12}$ (probability that a GA--DNS run is lighter than a competitor run;
+0.5\,=\,no difference). Infeasible runs are ranked as worse than every feasible run.}
 \label{tab:tests}
 \begin{tabular}{@{}llrrl@{}}
 \toprule
-Truss & Competitor & $p_{\mathrm{Holm}}$ & $A_{12}$ & Conclusion\\
+Truss & Competitor & $p_{\mathrm{Holm}}$ & $A_{12}$ & Conclusion ($\alpha=0.05$)\\
 \midrule
-6-bar & GA & 0.005 & 0.71 & GA--DNS lighter\\
+6-bar & DNS--ILS & 1.000 & 0.50 & no significant difference\\
+ & GA & $<$0.001 & 0.95 & GA--DNS lighter\\
  & DE & $<$0.001 & 1.00 & GA--DNS lighter\\
- & PSO & $<$0.001 & 0.86 & GA--DNS lighter\\
- & SA & 0.853 & 0.47 & n.s.; competitor better\\
- & ACO & 0.007 & 0.68 & GA--DNS lighter\\
+ & PSO & $<$0.001 & 0.90 & GA--DNS lighter\\
+ & SA & $<$0.001 & 0.97 & GA--DNS lighter\\
+ & ACO & $<$0.001 & 0.80 & GA--DNS lighter\\
  & BB-BC & $<$0.001 & 1.00 & GA--DNS lighter\\
-25-bar & GA & 1.000 & 0.50 & n.s.\\
- & DE & 0.189 & 0.60 & n.s.\\
- & PSO & 1.000 & 0.50 & n.s.; competitor better\\
- & SA & 0.047 & 0.66 & GA--DNS lighter\\
- & ACO & $<$0.001 & 0.84 & GA--DNS lighter\\
- & BB-BC & $<$0.001 & 0.97 & GA--DNS lighter\\
-72-bar & GA & 0.273 & 0.60 & n.s.\\
- & DE & $<$0.001 & 0.98 & GA--DNS lighter\\
- & PSO & 0.055 & 0.70 & n.s.\\
- & SA & 0.992 & 0.28 & n.s.; competitor better\\
- & ACO & 0.129 & 0.66 & n.s.\\
+\addlinespace
+25-bar & DNS--ILS & 1.000 & 0.50 & no significant difference\\
+ & GA & 0.023 & 0.68 & GA--DNS lighter\\
+ & DE & 0.242 & 0.57 & no significant difference\\
+ & PSO & 0.079 & 0.62 & no significant difference\\
+ & SA & $<$0.001 & 0.78 & GA--DNS lighter\\
+ & ACO & 0.242 & 0.57 & no significant difference\\
+ & BB-BC & $<$0.001 & 1.00 & GA--DNS lighter\\
+\addlinespace
+72-bar & DNS--ILS & 0.614 & 0.45 & no significant difference\\
+ & GA & $<$0.001 & 0.99 & GA--DNS lighter\\
+ & DE & $<$0.001 & 0.99 & GA--DNS lighter\\
+ & PSO & $<$0.001 & 1.00 & GA--DNS lighter\\
+ & SA & $<$0.001 & 0.88 & GA--DNS lighter\\
+ & ACO & $<$0.001 & 1.00 & GA--DNS lighter\\
  & BB-BC & $<$0.001 & 1.00 & GA--DNS lighter\\
 \bottomrule
 \end{tabular}
