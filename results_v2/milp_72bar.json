@@ -1,12 +1,12 @@
 {
  "status": "Time limit reached",
- "runtime": 60.07716355000002,
+ "runtime": 5400.083978465,
  "n_binary": 1152,
  "n_cont": 10464,
  "n_rows": 17120,
- "bound": 657.3059192485456,
- "gap": 0.6019893224809758,
- "nodes": 2,
+ "bound": 812.3943337715857,
+ "gap": 0.5080804694917396,
+ "nodes": 5926,
  "warm_weight": 1651.4781044212755,
  "idx": [
   37,
@@ -47,5 +47,5 @@
   "ISA 90x90x6",
   "ISA 55x55x4"
  ],
- "time_limit": 60.0
+ "time_limit": 5400
 }

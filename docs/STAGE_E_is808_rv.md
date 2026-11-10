@@ -31,7 +31,7 @@ That first run was overwritten and is not part of the archived results.
 |---|---|---|---|---|---|
 | 6-bar | 156.82 | certified global optimum | 100 % | 100 % | = W* |
 | 25-bar | 981.22 | certified global optimum | 100 % | 100 % | = W* |
-| 72-bar | 1651.48 | best known; MILP gap about 60 % | 5 % (16/20 within 1 %) | 0 % (14/20 within 1 %) | +5.7 % |
+| 72-bar | 1651.48 | best known; MILP lower bound 812.39 kg, gap 51 % (90 min) | 5 % (16/20 within 1 %) | 0 % (14/20 within 1 %) | +5.7 % |
 
 ## Still to verify by the author
 - 25-bar load at node 6 (0.5 or 0.6 kip) against the Camp & Bichon (2004) paper.

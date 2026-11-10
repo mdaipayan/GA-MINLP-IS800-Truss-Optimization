@@ -81,8 +81,8 @@ w("tab_milp.tex", r"""\begin{table*}[tbp]
 \caption{Exact MILP (\cref{sec:milp}) solved with HiGHS branch-and-bound.
 Lower bound\,=\,proved bound on the global optimum; best known\,=\,lightest feasible design
 found by any method; gap\,=\,(best known $-$ lower bound)/best known.
-The 72-bar run was stopped at the 5400\,s time limit. Times are wall-clock times on a
-machine shared with other jobs and are indicative only.}
+The 72-bar run was stopped at the 5400\,s time limit. Times are wall-clock times of single runs
+and are indicative only.}
 \label{tab:milp}
 \begin{tabular}{@{}lrrrrrrrrl@{}}
 \toprule

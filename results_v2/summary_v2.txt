@@ -39,7 +39,7 @@ GA-DNS    1651.48  1663.09  1664.52    5.29  1676.21  100%    5%    16260   2.84
 FSD       1746.16  1746.16  1746.16    0.00  1746.16  100%    0%        6   0.32
 SQP-R     1878.77  1878.77  1878.77    0.00  1878.77  100%    0%      469   0.17
 DNS-ILS   1655.83  1661.75  1663.90    3.94  1670.82  100%    0%    12583   2.80
-MILP     lower bound 657.31, gap to best known 60.20%, status=Time limit reached, time=60.1s
+MILP     lower bound 812.39, gap to best known 50.81%, status=Time limit reached, time=5400.1s
 
 Mann-Whitney U, two-sided, Holm-corrected; A12 = P(GA-DNS run lighter)
 6-bar   vs DNS-ILS p=1.00e+00 p_holm=1.00e+00 A12=0.50

@@ -3,8 +3,8 @@
 \caption{Exact MILP (\cref{sec:milp}) solved with HiGHS branch-and-bound.
 Lower bound\,=\,proved bound on the global optimum; best known\,=\,lightest feasible design
 found by any method; gap\,=\,(best known $-$ lower bound)/best known.
-The 72-bar run was stopped at the 5400\,s time limit. Times are wall-clock times on a
-machine shared with other jobs and are indicative only.}
+The 72-bar run was stopped at the 5400\,s time limit. Times are wall-clock times of single runs
+and are indicative only.}
 \label{tab:milp}
 \begin{tabular}{@{}lrrrrrrrrl@{}}
 \toprule
@@ -12,7 +12,7 @@ Truss & Binary & Continuous & Rows & B\&B nodes & Time (s) & Lower bound (kg) & 
 \midrule
 6-bar & 432 & 438 & 576 & 0 & 0 & 156.82 & 156.82 & 0.0 & optimal\\
 25-bar & 576 & 1,818 & 2,815 & 21,298 & 430 & 981.22 & 981.22 & 0.0 & optimal\\
-72-bar & 1,152 & 10,464 & 17,120 & 2 & 60 & 657.31 & 1651.48 & 60.2 & time limit\\
+72-bar & 1,152 & 10,464 & 17,120 & 5,926 & 5,400 & 812.39 & 1651.48 & 50.8 & time limit\\
 \bottomrule
 \end{tabular}
 \end{table*}
