@@ -25,7 +25,7 @@ GA-DNS     981.22   981.22   981.22    0.00   981.22  100%  100%     5239   1.00
 FSD        981.22   981.22   981.22    0.00   981.22  100%  100%        2   0.03
 SQP-R     1019.55  1019.55  1019.55    0.00  1019.55  100%    0%      152   0.04
 DNS-ILS    981.22   981.22   981.22    0.00   981.22  100%  100%     1854   1.00
-MILP     lower bound 981.22, gap to best known 0.00%, status=Optimal, time=910.4s
+MILP     lower bound 981.22, gap to best known 0.00%, status=Optimal, time=429.6s
 
 72-bar  (budget 20000 analyses; best known 1651.48 kg)
 method       best   median     mean     std    worst    SR  hit%  NFE_med   t(s)

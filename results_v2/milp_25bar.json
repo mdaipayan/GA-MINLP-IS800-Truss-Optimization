@@ -1,12 +1,12 @@
 {
  "status": "Optimal",
- "runtime": 910.428614916,
+ "runtime": 429.59100003699996,
  "n_binary": 576,
  "n_cont": 1818,
  "n_rows": 2815,
  "bound": 981.2215086186769,
  "gap": 0.0,
- "nodes": 30357,
+ "nodes": 21298,
  "warm_weight": 981.2215086186769,
  "idx": [
   2,
@@ -30,5 +30,6 @@
   "ISA 130x130x8",
   "ISA 130x130x8",
   "ISA 100x100x8"
- ]
+ ],
+ "time_limit": 5400.0
 }
